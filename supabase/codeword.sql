@@ -6,6 +6,7 @@
 
 create schema if not exists private;          -- not exposed through the API
 create table if not exists private.settings (k text primary key, v text not null);
+alter table private.settings enable row level security;   -- no policies: only the check below can read it
 
 -- ▼ set the codeword
 insert into private.settings (k, v) values ('codeword', 'change-me') on conflict (k) do update set v = excluded.v;
