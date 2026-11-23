@@ -76,6 +76,15 @@ they click "First time here? Create your account" and choose a password.
    distinctive name in its address and title. Companies with a verified site and a category score of 8 or more join
    **Picks** automatically, marked "New pick" for a week. To run it straight away: Actions → "Update the register" → Run workflow.
 
+## Trademark filings
+Every Monday IP India publishes its Trade Marks Journal (search.ipindia.gov.in/IPOJournal/Journal/Trademark) as PDFs
+by class. The nightly job checks for a new issue and reads the consumer classes: cosmetics (3), bags (18),
+clothing (25), toys (28), food (29, 30), drinks (32) and spirits (33). It keeps filings by private companies and LLPs,
+filed in the last 18 months and marked "Proposed to be Used", i.e. brands that aren't on sale yet. A filing by a
+company already in the register is tagged on it; the rest appear in the **Trademark filings** file as pre-launch
+brands. Journals show a trademark months to years after it was filed, so matches with the newest companies grow
+over time.
+
 ## How companies are filed
 `pipeline/categorize.py` scores each private company (Pvt Ltd or OPC) against every category using its
 registered business activity (the NIC code inside the CIN) and words in its name, and files it in the best

@@ -312,7 +312,7 @@ const CATS = [
   ["web3", "Web3 & blockchain", "Tech", "CHAIN"],
 ];
 const CAT = Object.fromEntries(CATS.map(([id, label, group, word], i) => [id, { id, label, group, word, i }]));
-const SPECIAL = { picks: { label: "Picks", word: "PICKS", i: 40 }, all: { label: "All companies", word: "ALL", i: 41 } };
+const SPECIAL = { picks: { label: "Picks", word: "PICKS", i: 40 }, tm: { label: "Trademark filings", word: "TM", i: 43 }, all: { label: "All companies", word: "ALL", i: 41 } };
 /* Each file shows the thing itself as a silhouette. Objects are drawn in a 320x180 box centred on (160,95).
    m = main ink, a = accent ink, x = the backdrop colour (used for cut-outs). */
 const OBJ = {
@@ -353,6 +353,7 @@ const OBJ = {
   web3: (m, a, x) => [[64, m, a], [132, a, m], [200, m, a]].map(([X, t, s], i) => `<path d="M${X} ${86 - (i === 1 ? 24 : 0)} l36 -18 l36 18 l-36 18z" fill="${t}"/><path d="M${X} ${86 - (i === 1 ? 24 : 0)} l36 18 v40 l-36 -18z" fill="${s}"/><path d="M${X + 36} ${104 - (i === 1 ? 24 : 0)} l36 -18 v40 l-36 18z" fill="${t}" opacity="0.75"/>`).join("") + `<path d="M126 110 l14 -6 M194 104 l12 6" stroke="${m}" stroke-width="5"/>`,
   picks: (m, a, x) => { let d = ""; for (let i = 0; i < 16; i++) { const ang = (i / 16) * Math.PI * 2 - Math.PI / 2, r = i % 2 ? 30 : 66; d += `${i ? "L" : "M"}${(160 + r * Math.cos(ang)).toFixed(1)} ${(92 + r * Math.sin(ang)).toFixed(1)}`; } return `<path d="${d}Z" fill="${a}"/><circle cx="160" cy="92" r="20" fill="${m}"/>` + txt(160, 101, 26, x, "1", `text-anchor="middle"`); },
   all: (m, a, x) => `<circle cx="160" cy="92" r="48" fill="${m}"/><ellipse cx="160" cy="96" rx="96" ry="17" fill="none" stroke="${a}" stroke-width="8" transform="rotate(-14 160 96)"/><circle cx="262" cy="40" r="10" fill="${a}"/>`,
+  tm: (m, a, x) => `<circle cx="160" cy="92" r="56" fill="${m}"/><circle cx="160" cy="92" r="44" fill="none" stroke="${a}" stroke-width="6"/>` + txt(160, 112, 58, a, "R", `text-anchor="middle"`) + `<rect x="200" y="122" width="86" height="24" fill="${a}" transform="rotate(-8 243 134)"/>` + txt(243, 140, 15, x, "PRE-LAUNCH", `text-anchor="middle" letter-spacing="1" transform="rotate(-8 243 134)"`),
   brands: (m, a, x) => `<path d="M112 70 h96 l10 86 h-116z" fill="${m}"/><path d="M134 72 v-14 a26 26 0 0 1 52 0 v14" fill="none" stroke="${m}" stroke-width="8"/><circle cx="134" cy="84" r="5" fill="${a}"/><circle cx="186" cy="84" r="5" fill="${a}"/><rect x="124" y="108" width="72" height="22" fill="${a}"/>` + txt(160, 124, 14, x, "D2C", `text-anchor="middle" letter-spacing="2"`),
   list: (m, a, x) => `<path d="M90 56 h50 l10 12 h80 v84 h-140z" fill="${m}"/><rect x="90" y="76" width="140" height="76" fill="${m}"/><path d="M90 76 h140" stroke="${x}" stroke-width="3"/><rect x="150" y="104" width="68" height="22" fill="none" stroke="${a}" stroke-width="3" transform="rotate(-8 184 115)"/>` + txt(184, 121, 15, a, "CLASSIFIED", `text-anchor="middle" letter-spacing="1" transform="rotate(-8 184 115)"`),
 };
@@ -360,7 +361,7 @@ const SHORT = { ecommerce: "E-commerce", beauty: "Beauty", fashion: "Fashion", f
   food: "Food", drinks: "Drinks", alcohol: "Spirits", restaurants: "Restaurants", nutrition: "Nutrition", pets: "Pets", kids: "Kids & toys", fitness: "Sports",
   travel: "Travel", gadgets: "Gadgets", ev: "EV & mobility", media: "Media", ai: "AI", software: "Software", fintech: "Fintech", health: "Healthtech", biotech: "Biotech",
   edtech: "Edtech", climate: "Climate", agritech: "Agritech", deeptech: "Space & robotics", gaming: "Gaming", logistics: "Logistics", hrtech: "HR tech",
-  proptech: "Proptech", web3: "Web3", picks: "Picks", all: "All files" };
+  proptech: "Proptech", web3: "Web3", picks: "Picks", all: "All files", tm: "Trademarks" };
 
 /* Four poster stagings: spotlight, half-moon, horizon, diagonal. Object sits right, name sits left. */
 function stage(k, objFn, name, id) {
@@ -398,10 +399,12 @@ const title = (s) => s.toLowerCase().replace(/(^|[\s(&./-])([a-z])/g, (m, a, b) 
 const shortName = (n) => title(n).replace(/\s*\(opc\)/i, "").replace(/\s+(private limited|pvt\.? ltd\.?|limited)$/i, "").trim();
 const nameOf = (r) => r.b ? r.n : shortName(r.n);
 const kfmt = (n) => n >= 1e6 ? (n / 1e6).toFixed(n >= 1e7 ? 0 : 1) + "M" : n >= 1e3 ? Math.round(n / 1e3) + "K" : String(n);
-const STAGES = [["new", "Just incorporated"], ["early", "Early stage"], ["growing", "Growing"], ["scaled", "Scaled"]];
-const stageOf = (r) => !r.b ? "new" : (r.igf || 0) >= 500000 ? "scaled" : (r.igf || 0) >= 50000 ? "growing" : "early";
+const STAGES = [["prelaunch", "Pre-launch (trademark filed)"], ["new", "Just incorporated"], ["early", "Early stage"], ["growing", "Growing"], ["scaled", "Scaled"]];
+const stageOf = (r) => r.t ? "prelaunch" : !r.b ? "new" : (r.igf || 0) >= 500000 ? "scaled" : (r.igf || 0) >= 50000 ? "growing" : "early";
 const stageLabel = (r) => STAGES.find(([k]) => k === stageOf(r))[1];
 const isNewPick = (r) => !!r.pa && Date.now() - Date.parse(r.pa) < 7 * 864e5;
+const CLS = { 3: "cosmetics", 18: "bags & leather", 25: "clothing", 28: "toys & games", 29: "food", 30: "food", 32: "drinks", 33: "spirits" };
+const marks = (r) => (r.tm || []).map((x) => x.mk).filter(Boolean);
 const g = (q) => "https://www.google.com/search?q=" + encodeURIComponent(q);
 const fmt = (n) => n.toLocaleString("en-IN");
 const catLabel = (id) => CAT[id]?.label || SPECIAL[id]?.label || "";
@@ -435,7 +438,7 @@ function renderHome() {
     </div><div class="art">${heroArt()}</div></section>
 
     <div class="shead"><h2>Team <em>lists</em></h2><span>${lists.size ? `${lists.size} list${lists.size > 1 ? "s" : ""}` : "Make a list, then add companies to it from any file"}</span></div>
-    <div class="wall" id="listWall">${newListTile()}${sortedLists().map(([lid, l]) => listTile(lid, l)).join("")}${fileTile("picks")}</div>
+    <div class="wall" id="listWall">${newListTile()}${sortedLists().map(([lid, l]) => listTile(lid, l)).join("")}${fileTile("picks")}${fileTile("tm")}</div>
 
     <div class="shead"><h2>Consumer <em>brands</em></h2><span>${fmt(sum("Consumer"))} companies · ${group("Consumer").length} files</span></div>
     <div class="wall">${group("Consumer").map(fileTile).join("")}</div>
@@ -452,10 +455,11 @@ function renderHome() {
 function inView(r) {
   if (view === "all") return true;
   if (view === "picks") return !!r.p;
+  if (view === "tm") return !!r.tm;
   if (view === "list") return items.has(listId + "__" + r.c);
   return r.cat === view;
 }
-const multi = () => ["all", "picks", "list"].includes(view);
+const multi = () => ["all", "picks", "list", "tm"].includes(view);
 
 function renderCase(q = "") {
   const isList = view === "list", l = lists.get(listId);
@@ -465,6 +469,7 @@ function renderCase(q = "") {
   const blurb = isList ? `A team list. Add companies from any file using "Add to list" in the company's dossier.`
     : view === "picks" ? "Companies worth a look: hand-picked ones, plus any whose website the nightly check found live and carrying the company's name. Newest first."
     : view === "all" ? "Every company in the register, across all files."
+    : view === "tm" ? "Private companies that filed a consumer brand in the last 18 months that isn't on sale yet, from IP India's weekly Trade Marks Journal. Newest filings first. Companies already in the register are tagged too."
     : `${CAT[view].group === "Tech" ? "Tech startups" : "Consumer brands"} filed under ${CAT[view].label.toLowerCase()}, by business-activity code and name.`;
   $("app").innerHTML = `
     <a class="back" href="#">&larr; Back to the files</a>
@@ -542,6 +547,7 @@ function filtered() {
   if (view === "list" && sort === "score") rows.sort((a, b) => (items.get(listId + "__" + b.c)?.at || "").localeCompare(items.get(listId + "__" + a.c)?.at || ""));
   else if (sort === "new") rows.sort((a, b) => dkey(b).localeCompare(dkey(a)));
   else if (sort === "name") rows.sort((a, b) => a.n.localeCompare(b.n));
+  else if (view === "tm") rows.sort((a, b) => (b.fd || b.tm.at(-1).fd).localeCompare(a.fd || a.tm.at(-1).fd));
   else if (view === "picks") rows.sort((a, b) => (b.pa || "").localeCompare(a.pa || "") || (b.wv || 0) - (a.wv || 0) || (b.sc || 0) - (a.sc || 0));
   return rows;
 }
@@ -552,13 +558,14 @@ function listTags(cin) {
 }
 function rowHtml(r) {
   const web = r.w ? `<span class="web">${esc(r.w)}</span>${r.wv ? "" : " <span class='small'>(possible)</span>"}` : "";
-  const what = [r.d ? esc(r.d) : "", web].filter(Boolean).join(" · ");
+  const tmw = r.tm ? `® ${esc(marks(r).join(", ") || "logo mark")} · ${esc([...new Set(r.tm.map((x) => CLS[x.cls]))].join(", "))}` : "";
+  const what = [tmw, r.d ? esc(r.d) : "", web].filter(Boolean).join(" · ");
   return `<div class="row" role="listitem" tabindex="0" data-cin="${esc(r.c)}">
     <div class="c-name"><div class="co">${esc(nameOf(r))}${isNewPick(r) ? `<span class="pick">New pick</span>` : r.p && view !== "picks" ? `<span class="pick">Pick</span>` : ""}</div>${what ? `<div class="what">${what}</div>` : ""}</div>
-    <div class="c-founders founders ${r.f || r.b ? "" : "none"}">${r.b ? `<span class="tag brand">D2C · ${stageLabel(r)}</span>${r.igf ? ` <span class="small">${kfmt(r.igf)} on Instagram</span>` : ""}` : r.f ? esc(r.f) : "Not found yet"}</div>
+    <div class="c-founders founders ${r.f || r.b || r.t ? "" : "none"}">${r.t ? `<span class="tag brand">Pre-launch</span> <span class="small">filed ${esc(monthLabel(r.fd.slice(0, 7)))}</span>` : r.b ? `<span class="tag brand">D2C · ${stageLabel(r)}</span>${r.igf ? ` <span class="small">${kfmt(r.igf)} on Instagram</span>` : ""}` : r.f ? esc(r.f) : "Not found yet"}</div>
     ${multi() ? `<div class="c-cat cat">${esc(catLabel(r.cat))}</div>` : ""}
-    <div class="c-month mono">${r.b ? "–" : esc(monthLabel(r.m))}</div>
-    <div class="c-meta small">${r.b ? "" : `${esc(r.s || "")}<span class="m-inline"> · ${esc(monthLabel(r.m))}</span>`}</div>
+    <div class="c-month mono">${r.b || r.t ? "–" : esc(monthLabel(r.m))}</div>
+    <div class="c-meta small">${r.t ? esc(r.loc || "") : r.b ? "" : `${esc(r.s || "")}<span class="m-inline"> · ${esc(monthLabel(r.m))}</span>`}</div>
     <div class="c-score">${scoreHtml(r.sc)}</div>
     <div class="c-lists">${listTags(r.c)}</div>
   </div>`;
@@ -631,8 +638,8 @@ function openSheet(cin) {
   $("sheet").innerHTML = `
     <div class="art">${card(r.cat, counts[r.cat] || 0)}<button class="close" id="closeSheet">Close</button></div>
     <div class="body">
-      <div><span class="stamp">${esc(catLabel(r.cat))}${r.p ? " · Pick" : ""}${r.b ? " · " + stageLabel(r) : ""}</span><h2>${esc(nm)}</h2>${r.d ? `<div class="pitch">${esc(r.d)}</div>` : ""}</div>
-      ${r.b ? brandFacts(r) : `<dl class="facts">
+      <div><span class="stamp">${esc(catLabel(r.cat))}${r.p ? " · Pick" : ""}${r.b || r.t ? " · " + stageLabel(r) : ""}</span><h2>${esc(nm)}</h2>${r.d ? `<div class="pitch">${esc(r.d)}</div>` : ""}</div>
+      ${r.t ? tmFacts(r) : r.b ? brandFacts(r) : `<dl class="facts">
         <dt>Founders</dt><dd style="display:grid;gap:6px">${fRows}</dd>
         <dt>Website</dt><dd>${r.w ? `<a href="https://${esc(r.w)}" target="_blank" rel="noopener">${esc(r.w)}</a>${r.wv ? "" : ` <span class="small">(matched by name, check it)</span>`}` : `<span class="small">None found</span>`}</dd>
         ${r.e ? `<dt>Web check</dt><dd>${esc(r.e)}</dd>` : ""}
@@ -641,12 +648,13 @@ function openSheet(cin) {
         <dt>NIC code</dt><dd class="mono">${esc(r.nic || "")}</dd>
         <dt>CIN</dt><dd class="mono">${esc(r.c)}</dd>
         ${r.sc ? `<dt>Score</dt><dd>${scoreHtml(r.sc)}</dd>` : ""}
+        ${r.tm ? `<dt>Trademarks</dt><dd>${tmList(r)}</dd>` : ""}
       </dl>`}
       <div class="links">
         <a href="${g(nm)}" target="_blank" rel="noopener">Google</a>
         <a href="${g(`${nm} site:linkedin.com`)}" target="_blank" rel="noopener">LinkedIn</a>
         <a href="${g(`${nm} site:instagram.com`)}" target="_blank" rel="noopener">Instagram</a>
-        ${r.b ? `<a href="${g(`${nm} founder`)}" target="_blank" rel="noopener">Founders</a>` : `<a href="https://www.credonex.com/company/c-${encodeURIComponent(r.c)}" target="_blank" rel="noopener">Company record</a>`}
+        ${r.b || r.t ? `<a href="${g(`${nm} founder`)}" target="_blank" rel="noopener">Founders</a>` : `<a href="https://www.credonex.com/company/c-${encodeURIComponent(r.c)}" target="_blank" rel="noopener">Company record</a>`}
         <a href="https://tmrsearch.ipindia.gov.in/eregister/" target="_blank" rel="noopener">Trademarks</a>
       </div>
       ${listBox(cin)}
@@ -660,6 +668,19 @@ function openSheet(cin) {
   wireListBox(cin);
   if (note.at) whoName(note.by).then((n) => { if ($("tMeta")) $("tMeta").textContent = `Updated ${new Date(note.at).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}${n ? " by " + n : ""}`; });
   $("closeSheet").focus();
+}
+function tmList(r) {
+  return `<div style="display:grid;gap:8px">${r.tm.map((x) => `<div><b>${esc(x.mk || "Logo mark")}</b> <span class="small">class ${x.cls}, ${esc(CLS[x.cls] || "")}</span><br><span class="small">${esc(x.g)}</span><br><span class="mono small">Filed ${esc(x.fd)} · application ${esc(x.no)} · Journal ${esc(x.jn)}</span></div>`).join("")}</div>`;
+}
+function tmFacts(r) {
+  return `<dl class="facts">
+    <dt>Stage</dt><dd>Pre-launch: a consumer brand filed, marked "proposed to be used"</dd>
+    <dt>Trademarks</dt><dd>${tmList(r)}</dd>
+    <dt>Registry</dt><dd>${esc(r.loc || "")}</dd>
+    <dt>Website</dt><dd>${r.w ? `<a href="https://${esc(r.w)}" target="_blank" rel="noopener">${esc(r.w)}</a>` : `<span class="small">None found yet</span>`}</dd>
+    ${r.e ? `<dt>Web check</dt><dd>${esc(r.e)}</dd>` : ""}
+    <dt>Source</dt><dd class="small">IP India Trade Marks Journal. Not yet matched to an MCA company in the register.</dd>
+  </dl>`;
 }
 function brandFacts(r) {
   const basis = r.how === "website" ? "Read from the brand's website" : r.how === "name" ? "From what the brand is known for (its website couldn't be read). Check it." : "Not sorted yet: filed under E-commerce until someone checks it";
@@ -769,15 +790,15 @@ function startData() {
   loadData().then((data) => {
     ALL = data; byCin = new Map(); counts = {};
     for (const r of ALL) {
-      r._q = [r.n, r.f, r.din, r.b ? "" : r.c, r.d, r.w, r.ig].filter(Boolean).join(" ").toLowerCase();
-      byCin.set(r.c, r); counts[r.cat] = (counts[r.cat] || 0) + 1; if (r.p) counts.picks = (counts.picks || 0) + 1; if (r.b) counts.brands = (counts.brands || 0) + 1;
+      r._q = [r.n, r.f, r.din, r.b || r.t ? "" : r.c, r.d, r.w, r.ig, ...marks(r)].filter(Boolean).join(" ").toLowerCase();
+      byCin.set(r.c, r); counts[r.cat] = (counts[r.cat] || 0) + 1; if (r.p) counts.picks = (counts.picks || 0) + 1; if (r.b) counts.brands = (counts.brands || 0) + 1; if (r.tm) counts.tm = (counts.tm || 0) + 1;
     }
     counts.all = ALL.length;
     let k = 0;
     for (const grp of ["Consumer", "Tech"]) {
       for (const id of CATS.filter((c) => c[2] === grp).map((c) => c[0]).sort((a, b) => (counts[b] || 0) - (counts[a] || 0))) COMP_OF[id] = ORDER[k++ % ORDER.length];
     }
-    COMP_OF.picks = 0; COMP_OF.all = 2;
+    COMP_OF.picks = 0; COMP_OF.all = 2; COMP_OF.tm = 3;
     $("gq").placeholder = `Search all ${fmt(ALL.length)} companies, brands, founders, DINs`;
     route();
   }).catch(() => { $("app").innerHTML = `<p class="count">Couldn't open the register. On a new setup, run the one-time upload (pipeline/seed.py) first. Otherwise reload the page.</p>`; });

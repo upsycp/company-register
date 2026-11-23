@@ -21,6 +21,7 @@ from mca import CIN_RE, STATES, read_report  # noqa: E402
 from store import Store  # noqa: E402
 import enrich  # noqa: E402
 import websites  # noqa: E402
+import trademarks  # noqa: E402
 
 MIN_SCORE = int(os.environ.get("MIN_SCORE", "6"))
 BUDGET = float(os.environ.get("FOUNDERS_MIN", "20")) * 60
@@ -34,6 +35,7 @@ st = Store()
 data = st.get_json("data.json", [])
 cache = st.get_json("founders.json", {})
 webcache = st.get_json("websites.json", {})
+tmstate = st.get_json("trademarks.json", {})
 known = {r["c"] for r in data}
 print(f"register: {len(data)} records, founder cache: {len(cache)}", flush=True)
 
@@ -43,6 +45,7 @@ def publish():
     st.put("data.json", "[\n" + ",\n".join(json.dumps(r, ensure_ascii=False, separators=(",", ":")) for r in data) + "\n]\n")
     st.put("founders.json", json.dumps(cache))
     st.put("websites.json", json.dumps(webcache))
+    st.put("trademarks.json", json.dumps(tmstate))
     months = sorted({r["m"] for r in data if r.get("m")})
     st.put("meta.json", json.dumps({"updated": now(), "count": len(data), "months": months}))
 
@@ -81,12 +84,18 @@ for name in st.list("inbox/"):
     st.move(src, f"processed/{name}")
     added += n_file
     print(f"{name}: {len(rows)} rows, {n_file} new companies filed", flush=True)
-if added:
+# ---------------------------------------------------------------- 2b. trademark filings (new journal each Monday)
+try:
+    tagged, tm_new = trademarks.run(data, tmstate, log=lambda m: print(m, flush=True))
+except Exception as e:  # noqa: BLE001  - a journal problem shouldn't stop the rest of the update
+    tagged, tm_new = 0, 0
+    print("trademark journal step failed:", type(e).__name__, e, flush=True)
+if added or tagged or tm_new:
     publish()   # get new companies on the site before the slow founder lookup
 
 # ---------------------------------------------------------------- 3. founders
 cutoff = (datetime.now(timezone.utc) - timedelta(days=RETRY_DAYS)).isoformat()
-todo = [r for r in data if not r.get("b") and not r.get("f") and cache.get(r["c"], {}).get("at", "") < cutoff
+todo = [r for r in data if not r.get("b") and not r.get("t") and not r.get("f") and cache.get(r["c"], {}).get("at", "") < cutoff
         and not cache.get(r["c"], {}).get("directors")]
 todo.sort(key=lambda r: (r["c"] in cache, -r.get("sc", 0)))   # never-tried first, best matches first
 print(f"{len(todo)} companies need founders", flush=True)
@@ -125,5 +134,5 @@ print(f"founders: {done[0]} looked up, {done[1]} found", flush=True)
 # ---------------------------------------------------------------- 4. websites and picks
 checked, verified, picked = websites.run(data, webcache, time.time() + WEB_BUDGET)
 publish()
-print(f"done: {added} new companies, {done[0]} founder lookups ({done[1]} found), {checked} website checks "
+print(f"done: {added} new companies, {tm_new} trademark filings ({tagged} tagged), {done[0]} founder lookups ({done[1]} found), {checked} website checks "
       f"({verified} verified), {picked} new picks, {time.time() - start:.0f}s", flush=True)
