@@ -431,8 +431,6 @@ function renderHome() {
   $("app").innerHTML = `
     <section class="hero"><div class="copy">
       <span class="eyebrow">Classified · MCA incorporations</span>
-      <h1>The Register<span class="flip"><span>The Register</span></span></h1>
-      <p>Every company incorporated in India from ${monthLabel(months[0])} to ${monthLabel(months.at(-1))}, filed into ${CATS.length} categories, with founders, websites and lists your team builds together. Plus ${fmt(nB)} younger D2C brands that are already selling, staged by their Instagram reach.</p>
       <div class="facts"><div><b>${fmt(ALL.length)}</b><span>Companies</span></div><div><b>${fmt(withF)}</b><span>With founders</span></div><div><b>${CATS.length}</b><span>Files</span></div></div>
     </div><div class="art">${heroArt()}</div></section>
 
