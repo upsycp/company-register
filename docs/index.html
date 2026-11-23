@@ -57,10 +57,10 @@ button.red:hover:not(:disabled) { background: var(--black); border-color: var(--
 .hero h1 .flip { display: block; color: var(--red); transform: scaleY(-1); height: 0.42em; overflow: hidden; line-height: 0.84; margin-top: 0.02em; }
 .hero h1 .flip span { display: block; transform: translateY(-0.42em); }
 .hero p { margin: 0; color: #cfcac2; max-width: 52ch; font-size: 16px; }
-.hero .facts { display: flex; flex-wrap: wrap; gap: 0; border-top: 1px solid #333; padding-top: 14px; }
-.hero .facts div { padding-right: 26px; }
-.hero .facts b { display: block; font: 400 40px/1 var(--display); letter-spacing: 0.02em; }
-.hero .facts span { font: 400 12px var(--type); color: var(--grey); text-transform: uppercase; letter-spacing: 0.1em; }
+.hero .facts { display: flex; flex-wrap: wrap; gap: 14px 0; border-top: 1px solid #333; padding-top: 18px; }
+.hero .facts div { padding-right: clamp(24px, 4vw, 56px); }
+.hero .facts b { display: block; font: 400 clamp(64px, 8vw, 116px)/0.9 var(--display); letter-spacing: 0.01em; }
+.hero .facts span { font: 400 13px var(--type); color: var(--grey); text-transform: uppercase; letter-spacing: 0.1em; }
 .hero .art { position: relative; min-height: 320px; }
 .hero .art svg { position: absolute; inset: 0; }
 
@@ -431,7 +431,7 @@ function renderHome() {
   $("app").innerHTML = `
     <section class="hero"><div class="copy">
       <span class="eyebrow">Classified · MCA incorporations</span>
-      <div class="facts"><div><b>${fmt(ALL.length)}</b><span>Companies</span></div><div><b>${fmt(withF)}</b><span>With founders</span></div><div><b>${CATS.length}</b><span>Files</span></div></div>
+      <div class="facts"><div><b>${fmt(ALL.length)}</b><span>Companies</span></div><div><b>${fmt(withF)}</b><span>With founders</span></div></div>
     </div><div class="art">${heroArt()}</div></section>
 
     <div class="shead"><h2>Team <em>lists</em></h2><span>${lists.size ? `${lists.size} list${lists.size > 1 ? "s" : ""}` : "Make a list, then add companies to it from any file"}</span></div>
