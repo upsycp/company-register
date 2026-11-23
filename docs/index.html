@@ -78,9 +78,11 @@ button.red:hover:not(:disabled) { background: var(--black); border-color: var(--
 .file .cap b { font: 400 21px/1 var(--display); letter-spacing: 0.04em; }
 .file .cap span { font: 700 13px var(--type); color: var(--red); white-space: nowrap; }
 .file .no { font: 400 11px var(--type); color: #6b6660; letter-spacing: 0.12em; text-transform: uppercase; }
-.newlist .frame { background: var(--paper); border: 2px dashed var(--black); display: grid; place-items: center; }
+.newlist .frame { background: var(--paper); border: 2px dashed var(--black); display: grid; place-items: center; overflow: visible; padding: 14px 0; }
 .newlist form { display: grid; gap: 8px; width: min(86%, 260px); }
-.newlist .plus { font: 400 64px/1 var(--display); color: var(--red); }
+.newlist .plus { font: 400 40px/0.8 var(--display); color: var(--red); }
+.newlist input { padding: 8px 10px; }
+.newlist button { padding: 8px 12px; font-size: 16px; }
 .foot { color: #55514c; font: 400 13px var(--type); padding-block: 44px 64px; max-width: 90ch; }
 
 /* ---------- Case view ---------- */
