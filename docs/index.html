@@ -193,7 +193,15 @@ dl.facts a { color: var(--red); font-weight: 600; }
 .m-inline { display: none; }
 .bar .who { display: flex; gap: 8px; align-items: center; }
 body.out .bar .who, body.out .bar .search { visibility: hidden; }
-.gate .art { align-self: stretch; }
+.gate .art { align-self: stretch; aspect-ratio: auto; max-height: none; min-height: 300px; }
+.scan .col { animation: scan-up 26s linear infinite; }
+.scan .col.b { animation-duration: 34s; }
+.scan .beam { animation: scan-beam 3.2s ease-in-out infinite alternate; }
+.scan .hit { opacity: 0; transform-origin: 160px 148px; animation: scan-hit 6.4s ease-out infinite; }
+@keyframes scan-up { from { transform: translateY(0); } to { transform: translateY(-624px); } }
+@keyframes scan-beam { from { transform: translateY(20px); } to { transform: translateY(230px); } }
+@keyframes scan-hit { 0%, 44% { opacity: 0; transform: scale(1.8); } 48% { opacity: 1; transform: scale(1); } 72% { opacity: 1; transform: scale(1); } 80%, 100% { opacity: 0; transform: scale(1); } }
+@media (prefers-reduced-motion: reduce) { .scan .col, .scan .beam { animation: none; } .scan .hit { animation: none; opacity: 1; } }
 .bar .who button { font-size: 15px; padding: 7px 11px; background: transparent; color: var(--white); border-color: #3a3735; white-space: nowrap; }
 .bar .who button:hover:not(:disabled) { background: var(--red); border-color: var(--red); }
 .gate { margin: 28px auto 64px; max-width: 980px; }
@@ -785,34 +793,53 @@ function gate(msg = "", err = false) {
   started = false; document.body.classList.add("out"); $("gq").disabled = true;
   $("sync").textContent = ""; $("sync").classList.remove("live");
   $("app").innerHTML = `<section class="titlecard gate"><div class="copy">
-    <span class="eyebrow">Restricted · eyes only</span>
-    <h1>Identify yourself</h1>
-    <p>New companies from India's monthly MCA filings, filed by category, with founders and your team's lists. Give your work email and the team codeword.</p>
+    <span class="eyebrow">Restricted · team only</span>
+    <h1>Sign in</h1>
+    <p>New companies from India's monthly MCA filings, filed by category, with founders and your team's lists. Your user ID is your work email.</p>
     <form id="authForm" novalidate>
-      <input type="email" id="authEmail" placeholder="Agent email" autocomplete="email" aria-label="Email" required>
-      <input type="password" id="authPass" placeholder="Codeword" autocomplete="current-password" aria-label="Team codeword" required>
-      <button class="red" id="authGo">Request clearance</button>
+      <input type="email" id="authEmail" placeholder="User ID" autocomplete="email" aria-label="Email" required>
+      <input type="password" id="authPass" placeholder="Code" autocomplete="current-password" aria-label="Team code" required>
+      <button class="red" id="authGo">Sign in</button>
       <span class="msg${err ? " err" : ""}" id="authMsg" role="status">${esc(msg)}</span>
     </form>
-  </div><div class="art">${card("all", 0)}</div></section>`;
+  </div><div class="art">${scanArt()}</div></section>`;
   $("authForm").onsubmit = async (e) => {
     e.preventDefault();
     const email = $("authEmail").value.trim().toLowerCase(), word = $("authPass").value, m = $("authMsg");
     m.classList.remove("err");
-    if (!/^\S+@\S+\.\S+$/.test(email) || !word.trim()) { m.textContent = "Email and codeword, agent."; m.classList.add("err"); return; }
-    $("authGo").disabled = true; m.textContent = "Checking your clearance…";
+    if (!/^\S+@\S+\.\S+$/.test(email) || !word.trim()) { m.textContent = "Enter your user ID (work email) and the team code."; m.classList.add("err"); return; }
+    $("authGo").disabled = true; m.textContent = "Signing in…";
     const password = codePass(word);
     let { error } = await sb.auth.signInWithPassword({ email, password });
     if (error && /invalid login/i.test(error.message)) {
       const r = await sb.auth.signUp({ email, password });   // first visit: make their account
       error = r.error;
       if (!error && !r.data.session) error = { message: "Supabase is still set to confirm emails. Turn off \"Confirm email\" in Authentication → Sign In / Providers → Email." };
-      if (error && /already registered|database error|wrong codeword|team list/i.test(error.message)) error = { message: "Access denied: wrong codeword, or this email isn't on the team list." };
+      if (error && /already registered|database error|wrong codeword|team list/i.test(error.message)) error = { message: "Access denied: wrong code, or this user ID isn't on the team list." };
     }
     if ($("authGo")) $("authGo").disabled = false;
     if (error) { m.textContent = error.message; m.classList.add("err"); return; }
     cleared = true;
   };
+}
+// sign-in art: two columns of company files drift past a red scanner; every few seconds one gets stamped
+function scanArt() {
+  const fileSvg = (x, y, i) => {
+    const w = 118, h = 84, lines = [0, 1, 2].map((k) => `<rect x="${x + 12}" y="${y + 30 + k * 14}" width="${[78, 58, 68][(i + k) % 3]}" height="5" fill="${K}" opacity="${k ? 0.35 : 0.8}"/>`).join("");
+    return `<path d="M${x} ${y + 8} h34 l6 -8 h${w - 40} v${h} h-${w}z" fill="${W}"/><rect x="${x + 12}" y="${y + 14}" width="30" height="7" fill="${R}"/>${lines}`;
+  };
+  const col = (x, n, off) => { let g = ""; for (let i = 0; i < n; i++) g += fileSvg(x, off + i * 104, i); return g; };
+  const set = (x, off) => col(x, 6, off);
+  return `<svg class="card scan" viewBox="0 0 320 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <rect width="320" height="300" fill="${K}"/>
+    <g transform="rotate(-10 160 150)">
+      <g class="col a">${set(30, -60)}${set(30, 564)}</g>
+      <g class="col b">${set(170, -10)}${set(170, 614)}</g>
+    </g>
+    <g class="beam"><rect x="-20" y="0" width="360" height="46" fill="url(#scanGlow)"/><rect x="-20" y="44" width="360" height="3" fill="${R}"/></g>
+    <g class="hit"><g transform="rotate(-12 160 150)"><rect x="96" y="128" width="128" height="40" fill="none" stroke="${R}" stroke-width="4"/>${txt(160, 157, 26, R, "FILED", `text-anchor="middle" letter-spacing="3"`)}</g></g>
+    <defs><linearGradient id="scanGlow" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${R}" stop-opacity="0"/><stop offset="1" stop-color="${R}" stop-opacity="0.45"/></linearGradient></defs>
+  </svg>`;
 }
 function stamp() {
   const s = document.createElement("div");
