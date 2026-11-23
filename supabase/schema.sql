@@ -44,6 +44,12 @@ create policy items_rw on public.list_items for all to authenticated using (publ
 drop policy if exists notes_rw on public.notes;
 create policy notes_rw on public.notes for all to authenticated using (public.is_team()) with check (public.is_team());
 
+-- newer Supabase projects don't grant table access to signed-in users automatically; RLS above still decides
+grant usage on schema public to authenticated;
+grant select on public.team to authenticated;
+grant select, insert, update, delete on public.lists, public.list_items, public.notes to authenticated;
+grant execute on function public.is_team() to authenticated;
+
 do $$ begin
   alter publication supabase_realtime add table public.lists, public.list_items, public.notes;
 exception when duplicate_object then null; end $$;

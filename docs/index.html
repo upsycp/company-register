@@ -823,7 +823,11 @@ async function enter(session) {
   if (started) return; started = true;
   me = (session.user.email || "").toLowerCase();
   const { data: team, error } = await sb.from("team").select("email").limit(1);
-  if (error || !team?.length) {
+  if (error) {
+    await sb.auth.signOut();
+    return gate(`The database refused the team check (${error.message}). Run the grant lines from supabase/schema.sql in the SQL Editor.`, true);
+  }
+  if (!team?.length) {
     await sb.auth.signOut();
     return gate(`${me} isn't on the team list. Ask the owner to add it, then try again.`, true);
   }
