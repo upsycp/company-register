@@ -204,6 +204,11 @@ body.out .bar .who, body.out .bar .search { visibility: hidden; }
 .gate .linkish { background: none; border: 0; padding: 0; color: #d8d2c8; font: 400 13px var(--type); text-decoration: underline; justify-self: start; }
 .gate .linkish:hover:not(:disabled) { background: none; color: var(--white); }
 @media (max-width: 760px) { .bar .who .up { display: none; } }
+.clearance { position: fixed; inset: 0; z-index: 90; display: grid; place-items: center; pointer-events: none; background: rgba(14, 13, 13, 0.55); animation: clr-fade 1.6s ease forwards; }
+.clearance span { font: 400 clamp(56px, 12vw, 128px)/0.9 var(--display); letter-spacing: 0.04em; text-align: center; text-transform: uppercase; color: var(--red); border: 8px solid var(--red); padding: 18px 34px 12px; background: var(--paper); transform: rotate(-9deg); animation: clr-stamp 0.32s cubic-bezier(.2, 1.6, .4, 1) both; }
+@keyframes clr-stamp { from { transform: rotate(-9deg) scale(2.4); opacity: 0; } to { transform: rotate(-9deg) scale(1); opacity: 1; } }
+@keyframes clr-fade { 0%, 70% { opacity: 1; } 100% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .clearance, .clearance span { animation: none; } }
 </style>
 </head>
 <body class="out">
@@ -772,34 +777,47 @@ function startData() {
 }
 
 /* ================= Sign-in ================= */
-let signUp = false, started = false;
+let started = false, cleared = false;
+// Team codeword sign-in: each teammate still gets their own account (so lists and notes say who did what),
+// with the shared codeword as its password. First visit creates the account automatically.
+const codePass = (w) => "register:" + w.trim().toLowerCase();
 function gate(msg = "", err = false) {
   started = false; document.body.classList.add("out"); $("gq").disabled = true;
   $("sync").textContent = ""; $("sync").classList.remove("live");
   $("app").innerHTML = `<section class="titlecard gate"><div class="copy">
-    <span class="eyebrow">Restricted · team only</span>
-    <h1>The Register</h1>
-    <p>New companies from India's monthly MCA filings, filed by category, with founders and your team's lists. Sign in with your work email.</p>
+    <span class="eyebrow">Restricted · eyes only</span>
+    <h1>Identify yourself</h1>
+    <p>New companies from India's monthly MCA filings, filed by category, with founders and your team's lists. Give your work email and the team codeword.</p>
     <form id="authForm" novalidate>
-      <input type="email" id="authEmail" placeholder="Work email" autocomplete="email" aria-label="Email" required>
-      <input type="password" id="authPass" placeholder="Password, 8+ characters" autocomplete="${signUp ? "new-password" : "current-password"}" aria-label="Password" required minlength="8">
-      <button class="red" id="authGo">${signUp ? "Create account" : "Sign in"}</button>
-      <button type="button" class="linkish" id="authFlip">${signUp ? "Already have an account? Sign in" : "First time here? Create your account"}</button>
+      <input type="email" id="authEmail" placeholder="Agent email" autocomplete="email" aria-label="Email" required>
+      <input type="password" id="authPass" placeholder="Codeword" autocomplete="current-password" aria-label="Team codeword" required>
+      <button class="red" id="authGo">Request clearance</button>
       <span class="msg${err ? " err" : ""}" id="authMsg" role="status">${esc(msg)}</span>
     </form>
   </div><div class="art">${card("all", 0)}</div></section>`;
-  $("authFlip").onclick = () => { signUp = !signUp; gate(); };
   $("authForm").onsubmit = async (e) => {
     e.preventDefault();
-    const email = $("authEmail").value.trim().toLowerCase(), password = $("authPass").value, m = $("authMsg");
+    const email = $("authEmail").value.trim().toLowerCase(), word = $("authPass").value, m = $("authMsg");
     m.classList.remove("err");
-    if (!email || password.length < 8) { m.textContent = "Enter your email and a password of at least 8 characters."; m.classList.add("err"); return; }
-    $("authGo").disabled = true; m.textContent = signUp ? "Creating your account…" : "Signing in…";
-    const { data, error } = signUp ? await sb.auth.signUp({ email, password }) : await sb.auth.signInWithPassword({ email, password });
+    if (!/^\S+@\S+\.\S+$/.test(email) || !word.trim()) { m.textContent = "Email and codeword, agent."; m.classList.add("err"); return; }
+    $("authGo").disabled = true; m.textContent = "Checking your clearance…";
+    const password = codePass(word);
+    let { error } = await sb.auth.signInWithPassword({ email, password });
+    if (error && /invalid login/i.test(error.message)) {
+      const r = await sb.auth.signUp({ email, password });   // first visit: make their account
+      error = r.error;
+      if (!error && !r.data.session) error = { message: "Supabase is still set to confirm emails. Turn off \"Confirm email\" in Authentication → Sign In / Providers → Email." };
+      if (error && /already registered|database error|wrong codeword|team list/i.test(error.message)) error = { message: "Access denied: wrong codeword, or this email isn't on the team list." };
+    }
     if ($("authGo")) $("authGo").disabled = false;
     if (error) { m.textContent = error.message; m.classList.add("err"); return; }
-    if (signUp && !data.session) m.textContent = "Account created. Confirm the link in your inbox, then sign in.";
+    cleared = true;
   };
+}
+function stamp() {
+  const s = document.createElement("div");
+  s.className = "clearance"; s.setAttribute("role", "status"); s.innerHTML = `<span>Clearance<br>granted</span>`;
+  document.body.appendChild(s); setTimeout(() => s.remove(), 1600);
 }
 async function enter(session) {
   if (started) return; started = true;
@@ -807,8 +825,9 @@ async function enter(session) {
   const { data: team, error } = await sb.from("team").select("email").limit(1);
   if (error || !team?.length) {
     await sb.auth.signOut();
-    return gate(`${me} isn't on the team list yet. Ask the owner to add it, then sign in again.`, true);
+    return gate(`${me} isn't on the team list. Ask the owner to add it, then try again.`, true);
   }
+  if (cleared) { cleared = false; stamp(); }
   document.body.classList.remove("out"); $("gq").disabled = false; $("outBtn").title = `Signed in as ${me}`;
   startData(); connect();
 }
