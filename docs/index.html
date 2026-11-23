@@ -193,7 +193,7 @@ dl.facts a { color: var(--red); font-weight: 600; }
 .m-inline { display: none; }
 .bar .who { display: flex; gap: 8px; align-items: center; }
 body.out .bar .who, body.out .bar .search { visibility: hidden; }
-.gate .art { align-self: stretch; aspect-ratio: auto; max-height: none; min-height: 300px; }
+.gate .art { align-self: stretch; aspect-ratio: auto; max-height: none; min-height: 100%; }
 .scan .col { animation: scan-up 26s linear infinite; }
 .scan .col.b { animation-duration: 34s; }
 .scan .beam { animation: scan-beam 3.2s ease-in-out infinite alternate; }
@@ -204,7 +204,11 @@ body.out .bar .who, body.out .bar .search { visibility: hidden; }
 @media (prefers-reduced-motion: reduce) { .scan .col, .scan .beam { animation: none; } .scan .hit { animation: none; opacity: 1; } }
 .bar .who button { font-size: 15px; padding: 7px 11px; background: transparent; color: var(--white); border-color: #3a3735; white-space: nowrap; }
 .bar .who button:hover:not(:disabled) { background: var(--red); border-color: var(--red); }
-.gate { margin: 28px auto 64px; max-width: 980px; }
+.gate { position: fixed; inset: 0; z-index: 50; margin: 0; max-width: none; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); overflow-y: auto; }
+.gate .copy { padding: clamp(28px, 6vw, 96px); align-content: center; }
+.gate h1 { font-size: clamp(64px, 9vw, 150px); }
+body.out .bar { display: none; }
+@media (max-width: 760px) { .gate { grid-template-columns: minmax(0, 1fr); grid-template-rows: 34vh auto; } .gate .art { order: -1; min-height: 0; } }
 .gate form { display: grid; gap: 10px; max-width: 380px; }
 .gate input { width: 100%; }
 .gate .msg { font: 400 13px var(--type); color: #d8d2c8; min-height: 1em; }
