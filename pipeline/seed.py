@@ -8,6 +8,13 @@ HERE = os.path.dirname(os.path.abspath(__file__)); ROOT = os.path.dirname(HERE)
 sys.path.insert(0, HERE)
 from store import Store  # noqa: E402
 
+# settings can come from a local .env file (git ignores it) instead of the prompts below
+envf = os.path.join(ROOT, ".env")
+if os.path.exists(envf):
+    for line in open(envf):
+        k, _, v = line.partition("=")
+        if k.strip() in ("SUPABASE_URL", "SUPABASE_SERVICE_KEY") and v.strip():
+            os.environ.setdefault(k.strip(), v.strip().strip('"').strip("'"))
 url = os.environ.get("SUPABASE_URL") or input("Supabase Project URL: ").strip()
 key = os.environ.get("SUPABASE_SERVICE_KEY") or getpass.getpass("service_role key (hidden): ").strip()
 st = Store(url, key)

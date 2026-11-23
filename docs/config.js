@@ -2,6 +2,7 @@
 // Supabase sign-in and row-level security (only emails in the "team" table can read anything).
 // Fill these in from Supabase → Project Settings → API.
 window.RADAR_CONFIG = {
-  supabaseUrl: "",       // e.g. "https://abcdefgh.supabase.co"
-  supabaseAnonKey: "",   // the "anon public" key
+  supabaseUrl: "https://qpjijnkpymdngvslqfmi.supabase.co",
+  supabaseAnonKey: "sb_publishable_QF-UpojHKNgb_WXpGakAYw_5w0wc3hU",   // the "anon public" key
 };
+
