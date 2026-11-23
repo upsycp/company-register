@@ -68,10 +68,13 @@ they click "First time here? Create your account" and choose a password.
 1. Download **Master Details of Companies Registered** for the month from mca.gov.in → Data & Reports →
    Company/LLP Information → Incorporated Or Closed During The Month.
 2. On the site, click **Add MCA file** and pick the .xlsx.
-3. That night the job files the new companies (they appear the next morning) and starts looking up founders.
-   It looks up founders for up to 45 minutes every night, newest and best-matching first, and retries
-   companies with no directors yet every 10 days, since new companies take weeks to show up in public records.
-   To run it straight away: Actions → "Update the register" → Run workflow.
+3. That night the job files the new companies (they appear the next morning). Every night it then spends about
+   20 minutes looking up founders (newest and best-matching first; companies with no directors yet are retried every
+   10 days) and about 20 minutes on websites: it confirms sites already listed and looks for new ones (a web search if a
+   `BRAVE_API_KEY`, `TAVILY_API_KEY` or `SERPER_API_KEY` secret is set, otherwise likely domains such as name.com and
+   name.in). A site only counts as verified if it loads, isn't parked or for sale, and carries the company's
+   distinctive name in its address and title. Companies with a verified site and a category score of 8 or more join
+   **Picks** automatically, marked "New pick" for a week. To run it straight away: Actions → "Update the register" → Run workflow.
 
 ## How companies are filed
 `pipeline/categorize.py` scores each private company (Pvt Ltd or OPC) against every category using its

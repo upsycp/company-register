@@ -23,7 +23,12 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
-          TIME_BUDGET_MIN: "45"
+          FOUNDERS_MIN: "20"
+          WEBSITES_MIN: "22"
+          # optional: a search key finds far more websites than domain guessing (see README)
+          BRAVE_API_KEY: ${{ secrets.BRAVE_API_KEY }}
+          TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
+          SERPER_API_KEY: ${{ secrets.SERPER_API_KEY }}
           # optional paid CIN API, used when the free sources find nothing (see README)
           DIRECTORS_API_URL: ${{ secrets.DIRECTORS_API_URL }}
           DIRECTORS_API_HEADERS: ${{ secrets.DIRECTORS_API_HEADERS }}

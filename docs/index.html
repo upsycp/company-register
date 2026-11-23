@@ -401,6 +401,7 @@ const kfmt = (n) => n >= 1e6 ? (n / 1e6).toFixed(n >= 1e7 ? 0 : 1) + "M" : n >= 
 const STAGES = [["new", "Just incorporated"], ["early", "Early stage"], ["growing", "Growing"], ["scaled", "Scaled"]];
 const stageOf = (r) => !r.b ? "new" : (r.igf || 0) >= 500000 ? "scaled" : (r.igf || 0) >= 50000 ? "growing" : "early";
 const stageLabel = (r) => STAGES.find(([k]) => k === stageOf(r))[1];
+const isNewPick = (r) => !!r.pa && Date.now() - Date.parse(r.pa) < 7 * 864e5;
 const g = (q) => "https://www.google.com/search?q=" + encodeURIComponent(q);
 const fmt = (n) => n.toLocaleString("en-IN");
 const catLabel = (id) => CAT[id]?.label || SPECIAL[id]?.label || "";
@@ -433,7 +434,7 @@ function renderHome() {
       <h1>The Register<span class="flip"><span>The Register</span></span></h1>
       <p>Every company incorporated in India from ${monthLabel(months[0])} to ${monthLabel(months.at(-1))}, filed into ${CATS.length} categories, with founders, websites and lists your team builds together. Plus ${fmt(nB)} younger D2C brands that are already selling, staged by their Instagram reach.</p>
       <div class="facts"><div><b>${fmt(ALL.length)}</b><span>Companies</span></div><div><b>${fmt(withF)}</b><span>With founders</span></div><div><b>${CATS.length}</b><span>Files</span></div></div>
-    </div><div class="art"><svg class="card" viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice" aria-hidden="true">${COMPOSE[3]("", 0, "hero")}</svg></div></section>
+    </div><div class="art">${heroArt()}</div></section>
 
     <div class="shead"><h2>Team <em>lists</em></h2><span>${lists.size ? `${lists.size} list${lists.size > 1 ? "s" : ""}` : "Make a list, then add companies to it from any file"}</span></div>
     <div class="wall" id="listWall">${newListTile()}${sortedLists().map(([lid, l]) => listTile(lid, l)).join("")}${fileTile("picks")}</div>
@@ -464,7 +465,7 @@ function renderCase(q = "") {
   const name = isList ? l.name : catLabel(view);
   const total = ALL.filter(inView).length;
   const blurb = isList ? `A team list. Add companies from any file using "Add to list" in the company's dossier.`
-    : view === "picks" ? "Hand-picked companies that stood out: unusual ideas, a live website or a clear product."
+    : view === "picks" ? "Companies worth a look: hand-picked ones, plus any whose website the nightly check found live and carrying the company's name. Newest first."
     : view === "all" ? "Every company in the register, across all files."
     : `${CAT[view].group === "Tech" ? "Tech startups" : "Consumer brands"} filed under ${CAT[view].label.toLowerCase()}, by business-activity code and name.`;
   $("app").innerHTML = `
@@ -543,7 +544,7 @@ function filtered() {
   if (view === "list" && sort === "score") rows.sort((a, b) => (items.get(listId + "__" + b.c)?.at || "").localeCompare(items.get(listId + "__" + a.c)?.at || ""));
   else if (sort === "new") rows.sort((a, b) => dkey(b).localeCompare(dkey(a)));
   else if (sort === "name") rows.sort((a, b) => a.n.localeCompare(b.n));
-  else if (view === "picks") rows.sort((a, b) => (b.wv || 0) - (a.wv || 0) || (b.sc || 0) - (a.sc || 0));
+  else if (view === "picks") rows.sort((a, b) => (b.pa || "").localeCompare(a.pa || "") || (b.wv || 0) - (a.wv || 0) || (b.sc || 0) - (a.sc || 0));
   return rows;
 }
 const scoreHtml = (sc) => sc ? `<span class="score" title="Score ${sc}">${Array.from({ length: 5 }, (_, i) => `<i class="${i < Math.round(sc / 2.2) ? "on" : ""}"></i>`).join("")}${esc(sc)}</span>` : `<span class="small">–</span>`;
@@ -555,7 +556,7 @@ function rowHtml(r) {
   const web = r.w ? `<span class="web">${esc(r.w)}</span>${r.wv ? "" : " <span class='small'>(possible)</span>"}` : "";
   const what = [r.d ? esc(r.d) : "", web].filter(Boolean).join(" · ");
   return `<div class="row" role="listitem" tabindex="0" data-cin="${esc(r.c)}">
-    <div class="c-name"><div class="co">${esc(nameOf(r))}${r.p && view !== "picks" ? `<span class="pick">Pick</span>` : ""}</div>${what ? `<div class="what">${what}</div>` : ""}</div>
+    <div class="c-name"><div class="co">${esc(nameOf(r))}${isNewPick(r) ? `<span class="pick">New pick</span>` : r.p && view !== "picks" ? `<span class="pick">Pick</span>` : ""}</div>${what ? `<div class="what">${what}</div>` : ""}</div>
     <div class="c-founders founders ${r.f || r.b ? "" : "none"}">${r.b ? `<span class="tag brand">D2C · ${stageLabel(r)}</span>${r.igf ? ` <span class="small">${kfmt(r.igf)} on Instagram</span>` : ""}` : r.f ? esc(r.f) : "Not found yet"}</div>
     ${multi() ? `<div class="c-cat cat">${esc(catLabel(r.cat))}</div>` : ""}
     <div class="c-month mono">${r.b ? "–" : esc(monthLabel(r.m))}</div>
@@ -821,6 +822,45 @@ function gate(msg = "", err = false) {
     if (error) { m.textContent = error.message; m.classList.add("err"); return; }
     cleared = true;
   };
+}
+// home hero art: a wall of company files in the dark; a torch beam checks them one by one, ticking each in red
+function heroArt() {
+  const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const cols = 6, rows = 5, fw = 60, fh = 44, gx = 72, gy = 60, ox = 14, oy = 12;
+  const pos = (i, j) => [ox + i * gx, oy + j * gy];
+  const file = (x, y, k, lit) => {
+    const body = lit ? W : "#262323", tab = lit ? R : "#332f2e", ln = lit ? K : "#383433";
+    return `<path d="M${x} ${y + 6} h20 l5 -6 h${fw - 25} v${fh} h-${fw}z" fill="${body}"/><rect x="${x + 8}" y="${y + 12}" width="18" height="5" fill="${tab}"/>`
+      + [0, 1, 2].map((n) => `<rect x="${x + 8}" y="${y + 22 + n * 7}" width="${[40, 28, 34][(k + n) % 3]}" height="3" fill="${ln}" opacity="${lit ? (n ? 0.4 : 0.85) : 1}"/>`).join("");
+  };
+  let dim = "", lit = "";
+  for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) { const [x, y] = pos(i, j); dim += file(x, y, i + j, false); lit += file(x, y, i + j, true); }
+  // the beam's route: it stops on each of these files, then a tick lands on it
+  const stops = [[2, 1], [4, 1], [3, 3], [1, 2], [4, 2], [2, 3], [3, 1], [1, 1]];
+  const per = 1.6, dur = stops.length * per, centre = ([i, j]) => { const [x, y] = pos(i, j); return [x + fw / 2, y + fh / 2 + 3]; };
+  const pts = stops.map(centre);
+  // move for 35% of each slot, dwell for the rest
+  const kt = [], cx = [], cy = [];
+  pts.forEach(([x, y], n) => { const a = n / stops.length, b = (n + 0.35) / stops.length; if (n) { kt.push(a.toFixed(4)); cx.push(pts[n - 1][0]); cy.push(pts[n - 1][1]); } kt.push(b.toFixed(4)); cx.push(x); cy.push(y); });
+  kt.unshift("0"); cx.unshift(pts.at(-1)[0]); cy.unshift(pts.at(-1)[1]); kt.push("1"); cx.push(pts.at(-1)[0]); cy.push(pts.at(-1)[1]);
+  const anim = (attr, vals) => still ? "" : `<animate attributeName="${attr}" dur="${dur}s" repeatCount="indefinite" calcMode="spline" keyTimes="${kt.join(";")}" values="${vals.join(";")}" keySplines="${Array(kt.length - 1).fill(".5 0 .3 1").join(";")}"/>`;
+  const [sx, sy] = still ? pts[0] : pts.at(-1);
+  const ticks = stops.map((st, n) => {
+    const [x, y] = pos(...st), on = ((n + 0.6) / stops.length).toFixed(4);
+    const op = still ? "" : `<animate attributeName="opacity" dur="${dur}s" repeatCount="indefinite" keyTimes="0;${on};${(+on + 0.01).toFixed(4)};0.96;1" values="0;0;1;1;0"/>`;
+    return `<g opacity="${still ? 1 : 0}"><circle cx="${x + fw - 6}" cy="${y + 8}" r="11" fill="${R}"/><path d="M${x + fw - 11} ${y + 8} l4 4 l7 -8" fill="none" stroke="${W}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>${op}</g>`;
+  }).join("");
+  return `<svg class="card" viewBox="0 0 440 310" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <defs>
+      <clipPath id="heroBeam"><circle cx="${sx}" cy="${sy}" r="54">${anim("cx", cx)}${anim("cy", cy)}</circle></clipPath>
+      <radialGradient id="heroGlow"><stop offset="0.55" stop-color="${W}" stop-opacity="0.16"/><stop offset="1" stop-color="${W}" stop-opacity="0"/></radialGradient>
+    </defs>
+    <rect width="440" height="310" fill="${K}"/>
+    ${dim}
+    <circle cx="${sx}" cy="${sy}" r="82" fill="url(#heroGlow)">${anim("cx", cx)}${anim("cy", cy)}</circle>
+    <g clip-path="url(#heroBeam)">${lit}</g>
+    ${ticks}
+  </svg>`;
 }
 // sign-in art: two columns of company files drift past a red scanner; every few seconds one gets stamped
 function scanArt() {

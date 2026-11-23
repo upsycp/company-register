@@ -3,8 +3,9 @@
 
 1. Reads any MCA workbooks the team uploaded on the site (storage: inbox/).
 2. Files each new private company into a category; the likely startups join the register.
-3. Looks up founders for companies that don't have them yet, for up to TIME_BUDGET_MIN minutes.
-4. Publishes the updated register (data.json) back to the private bucket.
+3. Looks up founders for companies that don't have them yet (FOUNDERS_MIN minutes).
+4. Checks and finds websites; companies with a verified site and a good score join Picks (WEBSITES_MIN minutes).
+5. Publishes the updated register (data.json) back to the private bucket.
 
 Needs SUPABASE_URL and SUPABASE_SERVICE_KEY. Nothing here is ever written to the repository.
 """
@@ -19,9 +20,11 @@ from categorize import CAT_MIN, best  # noqa: E402
 from mca import CIN_RE, STATES, read_report  # noqa: E402
 from store import Store  # noqa: E402
 import enrich  # noqa: E402
+import websites  # noqa: E402
 
 MIN_SCORE = int(os.environ.get("MIN_SCORE", "6"))
-BUDGET = float(os.environ.get("TIME_BUDGET_MIN", "40")) * 60
+BUDGET = float(os.environ.get("FOUNDERS_MIN", "20")) * 60
+WEB_BUDGET = float(os.environ.get("WEBSITES_MIN", "20")) * 60
 RETRY_DAYS = int(os.environ.get("RETRY_DAYS", "10"))   # directors of new companies take weeks to appear
 enrich.POLITE_DELAY = 1.0
 start = time.time()
@@ -30,6 +33,7 @@ now = lambda: datetime.now(timezone.utc).isoformat(timespec="seconds")  # noqa: 
 st = Store()
 data = st.get_json("data.json", [])
 cache = st.get_json("founders.json", {})
+webcache = st.get_json("websites.json", {})
 known = {r["c"] for r in data}
 print(f"register: {len(data)} records, founder cache: {len(cache)}", flush=True)
 
@@ -38,6 +42,7 @@ def publish():
     data.sort(key=lambda r: (-r.get("sc", 0), r["n"]))
     st.put("data.json", "[\n" + ",\n".join(json.dumps(r, ensure_ascii=False, separators=(",", ":")) for r in data) + "\n]\n")
     st.put("founders.json", json.dumps(cache))
+    st.put("websites.json", json.dumps(webcache))
     months = sorted({r["m"] for r in data if r.get("m")})
     st.put("meta.json", json.dumps({"updated": now(), "count": len(data), "months": months}))
 
@@ -115,4 +120,10 @@ def work(r):
 with ThreadPoolExecutor(6) as ex:
     list(ex.map(work, todo))
 publish()
-print(f"done: {added} new companies, {done[0]} founder lookups, {done[1]} found, {time.time() - start:.0f}s", flush=True)
+print(f"founders: {done[0]} looked up, {done[1]} found", flush=True)
+
+# ---------------------------------------------------------------- 4. websites and picks
+checked, verified, picked = websites.run(data, webcache, time.time() + WEB_BUDGET)
+publish()
+print(f"done: {added} new companies, {done[0]} founder lookups ({done[1]} found), {checked} website checks "
+      f"({verified} verified), {picked} new picks, {time.time() - start:.0f}s", flush=True)
