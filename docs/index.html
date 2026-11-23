@@ -1,0 +1,839 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>New Company Register</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Archivo:wght@400;500;600;700&family=Courier+Prime:wght@400;700&display=swap">
+<style>
+/* Layout: an agency dossier. Black command bar, a title sequence hero, then a wall of red/black/white "files"
+   (one per category) and the team's lists. Opening a file shows its title card, then a typed register on paper.
+   One committed look: three inks only. */
+:root {
+  --red: #d42a20; --black: #0e0d0d; --paper: #efebe4; --white: #faf8f4; --grey: #8d8a86; --rule: #cfc9bf; --red-soft: #f3d6d2;
+  --display: "Bebas Neue", "Oswald", Impact, "Arial Narrow", sans-serif;
+  --body: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --type: "Courier Prime", "Courier New", monospace;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+body { background: var(--paper); color: var(--black); font: 15px/1.45 var(--body); }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--black); }
+body::after { content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 50; opacity: 0.18; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.6 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+.wrap { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); max-width: 1480px; margin: 0 auto; }
+a { color: inherit; }
+:focus-visible { outline: 3px solid var(--red); outline-offset: 2px; }
+svg.card { display: block; width: 100%; height: 100%; }
+
+/* ---------- Command bar ---------- */
+.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 8; background: var(--black); color: var(--white); }
+.bar .wrap { display: flex; align-items: center; gap: 16px; padding-block: 10px; }
+.logo { display: flex; align-items: center; gap: 10px; text-decoration: none; font: 400 26px/1 var(--display); letter-spacing: 0.06em; white-space: nowrap; }
+.logo i { width: 14px; height: 14px; background: var(--red); display: block; }
+.bar .search { flex: 1; min-width: 0; max-width: 560px; margin-left: auto; }
+.bar input { background: #1d1b1b; color: var(--white); border-color: #2e2b2b; }
+.bar input::placeholder { color: var(--grey); }
+.status { font: 400 12px var(--type); color: var(--grey); white-space: nowrap; text-transform: uppercase; letter-spacing: 0.06em; }
+.status.live { color: var(--white); }
+.status.live::before { content: "■ "; color: var(--red); }
+
+input, select, textarea { font: 500 14px var(--body); color: var(--black); background: var(--white); border: 1.5px solid var(--black); border-radius: 0; padding: 9px 12px; }
+input[type=search] { width: 100%; }
+input:focus, select:focus, textarea:focus { outline: 2px solid var(--red); outline-offset: 0; }
+button { font: 400 18px/1 var(--display); letter-spacing: 0.08em; cursor: pointer; border-radius: 0; border: 1.5px solid var(--black); background: var(--white); color: var(--black); padding: 9px 16px 7px; }
+button:hover:not(:disabled) { background: var(--black); color: var(--white); }
+button:disabled { opacity: 0.4; cursor: not-allowed; }
+button.red { background: var(--red); border-color: var(--red); color: var(--white); }
+button.red:hover:not(:disabled) { background: var(--black); border-color: var(--black); }
+
+/* ---------- Hero ---------- */
+.hero { margin-top: 24px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); background: var(--black); color: var(--white); }
+.hero .copy { padding: clamp(22px, 3.6vw, 52px); display: grid; align-content: center; gap: 16px; min-width: 0; }
+.eyebrow { font: 700 12px var(--type); letter-spacing: 0.22em; text-transform: uppercase; color: var(--red); }
+.hero h1 { font: 400 clamp(56px, 8.6vw, 132px)/0.84 var(--display); margin: 0; letter-spacing: 0.01em; }
+.hero h1 .flip { display: block; color: var(--red); transform: scaleY(-1); height: 0.42em; overflow: hidden; line-height: 0.84; margin-top: 0.02em; }
+.hero h1 .flip span { display: block; transform: translateY(-0.42em); }
+.hero p { margin: 0; color: #cfcac2; max-width: 52ch; font-size: 16px; }
+.hero .facts { display: flex; flex-wrap: wrap; gap: 0; border-top: 1px solid #333; padding-top: 14px; }
+.hero .facts div { padding-right: 26px; }
+.hero .facts b { display: block; font: 400 40px/1 var(--display); letter-spacing: 0.02em; }
+.hero .facts span { font: 400 12px var(--type); color: var(--grey); text-transform: uppercase; letter-spacing: 0.1em; }
+.hero .art { position: relative; min-height: 320px; }
+.hero .art svg { position: absolute; inset: 0; }
+
+/* ---------- Files wall ---------- */
+.shead { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin: 46px 0 16px; border-bottom: 3px solid var(--black); padding-bottom: 8px; flex-wrap: wrap; }
+.shead h2 { font: 400 clamp(34px, 4vw, 52px)/0.9 var(--display); margin: 0; letter-spacing: 0.02em; }
+.shead h2 em { font-style: normal; color: var(--red); }
+.shead span { font: 400 13px var(--type); color: #55514c; text-transform: uppercase; letter-spacing: 0.08em; }
+.wall { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr)); gap: 18px 14px; }
+.file { display: grid; gap: 8px; text-decoration: none; color: var(--black); }
+.file .frame { aspect-ratio: 16 / 9; overflow: hidden; position: relative; background: var(--black); }
+.file .frame svg { position: absolute; inset: 0; transition: transform 0.4s cubic-bezier(.2,.8,.2,1); }
+.file:hover .frame svg, .file:focus-visible .frame svg { transform: scale(1.05); }
+.file .cap { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; border-top: 1.5px solid var(--black); padding-top: 6px; }
+.file .cap b { font: 400 21px/1 var(--display); letter-spacing: 0.04em; }
+.file .cap span { font: 700 13px var(--type); color: var(--red); white-space: nowrap; }
+.file .no { font: 400 11px var(--type); color: #6b6660; letter-spacing: 0.12em; text-transform: uppercase; }
+.newlist .frame { background: var(--paper); border: 2px dashed var(--black); display: grid; place-items: center; }
+.newlist form { display: grid; gap: 8px; width: min(86%, 260px); }
+.newlist .plus { font: 400 64px/1 var(--display); color: var(--red); }
+.foot { color: #55514c; font: 400 13px var(--type); padding-block: 44px 64px; max-width: 90ch; }
+
+/* ---------- Case view ---------- */
+.back { display: inline-block; margin-top: 20px; font: 700 13px var(--type); text-transform: uppercase; letter-spacing: 0.12em; text-decoration: none; }
+.back:hover { color: var(--red); }
+.titlecard { margin-top: 12px; display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); background: var(--black); color: var(--white); }
+.titlecard .copy { padding: clamp(18px, 3vw, 40px); display: grid; gap: 12px; align-content: center; min-width: 0; }
+.titlecard h1 { font: 400 clamp(44px, 6vw, 92px)/0.86 var(--display); margin: 0; letter-spacing: 0.01em; overflow-wrap: anywhere; }
+.titlecard p { margin: 0; color: #cfcac2; max-width: 56ch; }
+.titlecard .art { aspect-ratio: 16 / 9; max-height: 300px; width: 100%; justify-self: end; position: relative; overflow: hidden; }
+.titlecard .art svg { position: absolute; inset: 0; }
+.titlecard .tools { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.titlecard .tools button { background: transparent; color: var(--white); border-color: #555; font-size: 16px; }
+.titlecard .tools button:hover { background: var(--red); border-color: var(--red); }
+.controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding-block: 18px 4px; }
+.controls input[type=search] { flex: 1 1 260px; width: auto; min-width: 0; }
+label.chk { display: inline-flex; gap: 8px; align-items: center; font: 600 13.5px var(--body); white-space: nowrap; cursor: pointer; }
+label.chk input { accent-color: var(--red); width: 16px; height: 16px; }
+.count { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 12px 0 8px; font: 400 13px var(--type); text-transform: uppercase; letter-spacing: 0.06em; }
+.count b { color: var(--red); }
+
+.register { background: var(--white); border-top: 3px solid var(--black); }
+.register { --cols: minmax(0, 2.3fr) minmax(0, 1.6fr) 92px minmax(0, 0.9fr) 80px minmax(0, 1fr); }
+.register.withcat { --cols: minmax(0, 2.1fr) minmax(0, 1.5fr) minmax(0, 1fr) 92px minmax(0, 0.9fr) 80px minmax(0, 1fr); }
+.row { display: grid; grid-template-columns: var(--cols); gap: 16px; padding: 13px 16px; border-bottom: 1px solid var(--rule); align-items: start; cursor: pointer; }
+.row:hover { background: var(--red-soft); }
+.row.head { cursor: default; background: var(--black); color: var(--white); font: 400 12px var(--type); text-transform: uppercase; letter-spacing: 0.1em; padding-block: 9px; border: 0; }
+.row.head:hover { background: var(--black); }
+.row > div { min-width: 0; }
+.co { font: 700 15.5px/1.25 var(--body); overflow-wrap: anywhere; }
+.pick { display: inline-block; margin-left: 8px; font: 700 10.5px var(--type); letter-spacing: 0.1em; text-transform: uppercase; color: var(--white); background: var(--red); padding: 1px 6px; vertical-align: 2px; }
+.what { color: #5c5852; font-size: 13.5px; margin-top: 3px; }
+.what .web { color: var(--red); font-weight: 600; }
+.founders { font-size: 13.5px; overflow-wrap: anywhere; }
+.founders.none { color: var(--grey); }
+.mono { font: 400 13px var(--type); font-variant-numeric: tabular-nums; }
+.small { font-size: 12.5px; color: #6b6660; }
+.cat { font: 400 16px/1.1 var(--display); letter-spacing: 0.05em; }
+.score { display: flex; align-items: center; gap: 6px; font: 700 13px var(--type); }
+.score i { display: block; width: 6px; height: 14px; background: var(--rule); }
+.score i.on { background: var(--red); }
+.tags { display: flex; flex-wrap: wrap; gap: 4px; }
+.tag { font: 400 14px/1 var(--display); letter-spacing: 0.06em; background: var(--black); color: var(--white); padding: 4px 6px 3px; white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+.tag.none { background: transparent; color: var(--grey); padding-left: 0; font: 400 12px var(--type); text-transform: uppercase; letter-spacing: 0.06em; }
+.tag.brand { background: var(--red); }
+.more { display: flex; justify-content: center; padding: 22px 16px 64px; }
+.empty-state { padding: 48px 16px; text-align: center; font: 400 15px var(--type); color: #5c5852; text-transform: uppercase; letter-spacing: 0.04em; }
+.confirm { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; font: 400 13px var(--type); text-transform: uppercase; color: var(--white); }
+
+/* ---------- Dossier sheet ---------- */
+.scrim { position: fixed; inset: 0; background: rgb(14 13 13 / 0.6); z-index: 20; }
+aside.sheet { position: fixed; top: 0; right: 0; bottom: 0; width: min(580px, 100vw); z-index: 21; overflow-y: auto; background: var(--white); padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 24px); }
+.sheet .art { aspect-ratio: 16 / 7; position: relative; overflow: hidden; margin-top: env(safe-area-inset-top, 0px); background: var(--black); }
+.sheet .art svg { position: absolute; inset: 0; }
+.sheet .close { position: absolute; top: 12px; right: max(12px, env(safe-area-inset-right, 0px)); background: var(--black); color: var(--white); border-color: var(--black); font-size: 16px; }
+.sheet .close:hover { background: var(--red); border-color: var(--red); }
+.sheet .body { padding: 20px max(22px, env(safe-area-inset-right, 0px)) 0 22px; display: grid; gap: 20px; }
+.sheet .stamp { display: inline-block; font: 700 12px var(--type); letter-spacing: 0.18em; text-transform: uppercase; color: var(--red); border: 2px solid var(--red); padding: 3px 8px; transform: rotate(-2deg); }
+.sheet h2 { font: 400 clamp(38px, 5vw, 54px)/0.88 var(--display); margin: 10px 0 0; letter-spacing: 0.01em; overflow-wrap: anywhere; }
+.sheet .pitch { font: 500 16px/1.45 var(--body); margin-top: 10px; }
+dl.facts { display: grid; grid-template-columns: 116px minmax(0, 1fr); gap: 0; margin: 0; border-top: 2px solid var(--black); }
+dl.facts dt, dl.facts dd { padding: 9px 0; border-bottom: 1px solid var(--rule); margin: 0; }
+dl.facts dt { font: 700 11.5px var(--type); text-transform: uppercase; letter-spacing: 0.1em; color: #6b6660; padding-top: 11px; }
+dl.facts dd { overflow-wrap: anywhere; }
+dl.facts a { color: var(--red); font-weight: 600; }
+.links { display: flex; flex-wrap: wrap; gap: 8px; }
+.links a { font: 400 17px/1 var(--display); letter-spacing: 0.06em; text-decoration: none; border: 1.5px solid var(--black); padding: 8px 12px 6px; }
+.links a:hover { background: var(--black); color: var(--white); }
+.box { border: 2px solid var(--black); padding: 16px; display: grid; gap: 12px; }
+.box h3 { margin: 0; font: 400 26px/1 var(--display); letter-spacing: 0.04em; display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.box h3 small { font: 400 12px var(--type); color: #6b6660; letter-spacing: 0.06em; text-transform: uppercase; }
+.listpick { display: flex; flex-wrap: wrap; gap: 8px; }
+.listpick button { font-size: 16px; padding: 7px 12px 5px; display: inline-flex; gap: 8px; align-items: center; }
+.listpick button::before { content: "+"; color: var(--red); }
+.listpick button[aria-pressed="true"] { background: var(--red); border-color: var(--red); color: var(--white); }
+.listpick button[aria-pressed="true"]::before { content: "✓"; color: var(--white); }
+.inline { display: flex; gap: 8px; flex-wrap: wrap; }
+.inline input { flex: 1 1 180px; min-width: 0; }
+.box textarea { width: 100%; min-height: 96px; resize: vertical; }
+.meta { font: 400 12.5px var(--type); color: #6b6660; }
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(env(safe-area-inset-bottom, 0px) + 22px); background: var(--black); color: var(--white); padding: 11px 18px 9px; z-index: 30; font: 400 20px var(--display); letter-spacing: 0.08em; border-left: 8px solid var(--red); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .beam { animation: sweep 7s ease-in-out infinite; transform-box: view-box; transform-origin: 160px 0px; }
+  .roll { animation: roll 14s linear infinite; transform-box: fill-box; transform-origin: center; }
+  .blink { animation: blink 1.2s steps(2) infinite; }
+  aside.sheet:not([hidden]) { animation: slide 0.2s ease-out; }
+}
+@keyframes sweep { 50% { transform: rotate(6deg); } }
+@keyframes roll { to { transform: rotate(360deg); } }
+@keyframes blink { 50% { opacity: 0; } }
+@keyframes slide { from { transform: translateX(28px); opacity: 0; } }
+
+@media (max-width: 900px) {
+  .row.head { display: none; }
+  .register .row, .register.withcat .row { grid-template-columns: minmax(0, 1fr) auto; gap: 6px 12px; }
+  .row > .c-name { grid-column: 1; }
+  .row > .c-score { grid-column: 2; grid-row: 1; justify-self: end; }
+  .row > .c-founders, .row > .c-meta, .row > .c-cat, .row > .c-lists { grid-column: 1 / -1; }
+  .row > .c-month { display: none; }
+  .m-inline { display: inline !important; }
+  .status { display: none; }
+}
+@media (max-width: 760px) {
+  .hero, .titlecard { grid-template-columns: minmax(0, 1fr); }
+  .hero .art { order: -1; min-height: 0; aspect-ratio: 16 / 9; }
+  .titlecard .art { order: -1; max-height: none; }
+  .logo span { display: none; }
+}
+.m-inline { display: none; }
+.bar .who { display: flex; gap: 8px; align-items: center; }
+body.out .bar .who, body.out .bar .search { visibility: hidden; }
+.gate .art { align-self: stretch; }
+.bar .who button { font-size: 15px; padding: 7px 11px; background: transparent; color: var(--white); border-color: #3a3735; white-space: nowrap; }
+.bar .who button:hover:not(:disabled) { background: var(--red); border-color: var(--red); }
+.gate { margin: 28px auto 64px; max-width: 980px; }
+.gate form { display: grid; gap: 10px; max-width: 380px; }
+.gate input { width: 100%; }
+.gate .msg { font: 400 13px var(--type); color: #d8d2c8; min-height: 1em; }
+.gate .msg.err { color: #ff8a80; }
+.gate .linkish { background: none; border: 0; padding: 0; color: #d8d2c8; font: 400 13px var(--type); text-decoration: underline; justify-self: start; }
+.gate .linkish:hover:not(:disabled) { background: none; color: var(--white); }
+@media (max-width: 760px) { .bar .who .up { display: none; } }
+</style>
+</head>
+<body class="out">
+
+<header class="bar">
+  <div class="wrap">
+    <a class="logo" href="#"><i></i><span>New Company Register</span></a>
+    <div class="search"><input type="search" id="gq" placeholder="Search every company, founder, DIN" aria-label="Search all companies"></div>
+    <span class="status" id="sync"></span>
+    <span class="who" id="who"><button class="up" id="upBtn" title="Upload this month's MCA incorporation workbook">Add MCA file</button><input type="file" id="upFile" accept=".xlsx" multiple hidden><button id="outBtn">Sign out</button></span>
+  </div>
+</header>
+
+<main class="wrap" id="app"><p class="count">Opening the files…</p></main>
+
+<div class="scrim" id="scrim" hidden></div>
+<aside class="sheet" id="sheet" hidden aria-label="Company dossier"></aside>
+<div class="toast" id="toast" hidden></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="config.js"></script>
+<script>
+/* ================= Title-card compositions (red / black / white only) ================= */
+const R = "#d42a20", K = "#0e0d0d", W = "#faf8f4", G = "#8d8a86", D = "#3a3636";
+const FONT = `font-family="Bebas Neue, Oswald, Impact, sans-serif"`;
+function rng(seed) { let s = 7; for (const ch of String(seed)) s = (s * 31 + ch.charCodeAt(0)) >>> 0; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
+let clipN = 0;
+const txt = (x, y, size, fill, s, opts = "") => `<text x="${x}" y="${y}" ${FONT} font-size="${size}" fill="${fill}" ${opts}>${s}</text>`;
+const fit = (x, y, w, size, fill, s, anchor = "start") => txt(x, y, size, fill, s, `textLength="${w}" lengthAdjust="spacingAndGlyphs" text-anchor="${anchor}"`);
+const figure = (x, y, sc = 1, c = K) => `<g transform="translate(${x} ${y}) scale(${sc})"><ellipse cx="0" cy="-46" rx="15" ry="3" fill="${c}"/><rect x="-7" y="-56" width="14" height="10" fill="${c}"/><path d="M-11 -42 h22 l6 42 h-34z" fill="${c}"/><path d="M-3 -42 h6 l-3 14z" fill="${W}"/></g>`;
+const L33T = { A: "4", E: "3", O: "0", I: "1", S: "5" };
+
+const COMPOSE = [
+  // 0: DOUBLE (mirrored word)
+  (w, n, id) => { const c = `c${clipN++}`; return `<rect width="320" height="180" fill="${R}"/><rect y="100" width="320" height="80" fill="${K}"/>`
+    + fit(40, 98, 240, 74, W, w) + `<clipPath id="${c}"><rect y="100" width="320" height="34"/></clipPath><g clip-path="url(#${c})"><g transform="translate(0 198) scale(1 -1)">${fit(40, 98, 240, 74, R, w)}</g></g>`
+    + `<rect x="40" y="150" width="70" height="4" fill="${W}"/><rect x="118" y="150" width="24" height="4" fill="${R}"/>`; },
+  // 1: barcode with digits
+  (w, n, id) => { const r = rng(id); let o = `<rect width="320" height="180" fill="${R}"/>`; let x = 30;
+    while (x < 290) { const bw = 2 + r() * 9; o += `<rect x="${x.toFixed(1)}" y="34" width="${bw.toFixed(1)}" height="112" fill="${r() < 0.75 ? K : W}"/>`; x += bw + 2 + r() * 6; }
+    const d = String(n).padStart(4, "0").split(""); d.forEach((ch, i) => { o += `<rect x="${52 + i * 62}" y="20" width="26" height="30" fill="${R}"/>` + txt(65 + i * 62, 45, 30, W, ch, `text-anchor="middle"`); });
+    return o + `<rect x="30" y="132" width="${w.length * 15 + 12}" height="28" fill="${K}"/>` + txt(36, 155, 26, W, w); },
+  // 2: half moons row
+  (w, n, id) => { let o = `<rect width="320" height="180" fill="${K}"/><rect width="320" height="90" fill="${R}"/>`;
+    for (let i = 0; i < 5; i++) { const cx = 32 + i * 64; o += `<path d="M${cx - 26} 90 a26 26 0 0 1 52 0z" fill="${i % 2 ? K : W}"/><path d="M${cx - 26} 90 a26 26 0 0 0 52 0z" fill="${i % 2 ? R : W}" opacity="${i % 2 ? 1 : 0.95}"/>`; }
+    return o + txt(16, 164, 30, W, w) + txt(304, 164, 30, R, String(n), `text-anchor="end"`); },
+  // 3: spotlight & agent
+  (w, n, id) => `<rect width="320" height="180" fill="${K}"/><g class="beam"><path d="M150 0 h20 l110 180 h-230z" fill="${W}" opacity="0.92"/><path d="M160 0 h10 l110 180 h-120z" fill="${G}" opacity="0.35"/></g><path d="M100 180 l60 -26 l60 26z" fill="${R}"/>`
+    + figure(160, 156, 1.05) + (w ? txt(14, 30, 15, R, "CODENAME", `letter-spacing="3"`) + txt(14, 58, 32, W, w) : ""),
+  // 4: big initial | big number
+  (w, n, id) => `<rect width="320" height="180" fill="${K}"/><rect x="18" y="18" width="130" height="144" fill="${R}"/>` + fit(83, 150, 92, 150, W, w[0], "middle")
+    + fit(236, 150, 136, 150, W, n > 999 ? String(n).slice(0, 2) : String(n), "middle") + `<rect x="160" y="18" width="6" height="144" fill="${R}"/>`,
+  // 5: letters in boxes (POW3RB4LL)
+  (w, n, id) => { const s = w.slice(0, 8).split(""), bw = Math.min(34, 260 / s.length), x0 = 160 - (s.length * (bw + 4)) / 2; let o = `<rect width="320" height="180" fill="${R}"/>`;
+    s.forEach((ch, i) => { const alt = i % 2 && L33T[ch]; const x = x0 + i * (bw + 4); o += `<rect x="${x}" y="68" width="${bw}" height="44" fill="${alt ? K : W}"/>` + txt(x + bw / 2, 104, 38, alt ? W : K, alt || ch, `text-anchor="middle"`); });
+    return o + `<rect x="${x0}" y="122" width="40" height="4" fill="${K}"/>`; },
+  // 6: the ball
+  (w, n, id) => `<rect width="320" height="180" fill="${K}"/><path d="M200 -10 q-80 90 20 200" stroke="${W}" stroke-width="22" fill="none"/><path d="M260 -10 q-50 100 30 200" stroke="${D}" stroke-width="14" fill="none"/>`
+    + `<g class="roll"><circle cx="160" cy="98" r="58" fill="${R}"/><circle cx="160" cy="98" r="30" fill="${W}"/>${fit(160, 112, n > 99 ? 44 : 30, 40, K, String(n).slice(-3), "middle")}</g>` + txt(16, 36, 30, W, w),
+  // 7: polka grid
+  (w, n, id) => { const r = rng(id); let o = `<rect width="320" height="180" fill="${W}"/><rect width="320" height="34" fill="${R}"/>`;
+    for (let y = 0; y < 3; y++) for (let x = 0; x < 6; x++) { const red = r() < 0.18; o += `<circle cx="${28 + x * 53}" cy="${62 + y * 46}" r="19" fill="${red ? R : K}"/>`; }
+    return o + txt(14, 27, 26, W, w) ; },
+  // 8: stripes + mirrored word
+  (w, n, id) => { let o = `<rect width="320" height="180" fill="${R}"/>`; for (let i = 0; i < 6; i++) o += `<rect y="${10 + i * 30}" width="320" height="14" fill="${K}"/>`;
+    return o + `<rect x="0" y="62" width="320" height="56" fill="${R}"/>` + fit(22, 114, 276, 64, W, (w + " " + w).slice(0, 14)) ; },
+  // 9: exclamation
+  (w, n, id) => `<rect width="320" height="180" fill="${W}"/><path d="M110 0 h100 l-30 180 h-40z" fill="#e8e4de"/>` + txt(160, 150, 170, K, "!", `text-anchor="middle"`)
+    + `<rect x="226" y="40" width="80" height="26" fill="${R}"/>` + txt(232, 61, 22, W, w.slice(0, 8)) + txt(232, 92, 26, K, String(n)),
+  // 10: skyline
+  (w, n, id) => { const r = rng(id); let o = `<rect width="320" height="180" fill="${R}"/>`; let x = 0;
+    while (x < 320) { const bw = 14 + r() * 30, h = 40 + r() * 120; o += `<rect x="${x.toFixed(1)}" y="${(180 - h).toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" fill="${r() < 0.8 ? K : W}"/>`; x += bw + 4 + r() * 10; }
+    return o + `<rect x="0" y="0" width="${w.length * 15 + 26}" height="40" fill="${W}"/>` + txt(13, 31, 30, K, w); },
+  // 11: hand holding the ball (hard cut silhouette)
+  (w, n, id) => `<rect width="320" height="180" fill="${R}"/><rect y="120" width="320" height="60" fill="${K}"/><path d="M0 150 l120 -32 q30 -8 48 6 l10 16 q-6 10 -22 4 l-30 -10 l-126 46z" fill="${K}"/><rect x="0" y="146" width="40" height="34" fill="${W}"/>`
+    + `<circle cx="186" cy="110" r="24" fill="${W}"/>` + fit(186, 120, 26, 28, K, String(n).slice(-2), "middle") + txt(304, 40, 34, W, w, `text-anchor="end"`),
+];
+const ORDER = [0, 1, 2, 3, 1, 0, 3, 2];
+const COMP_OF = {};   // filled after data loads so neighbouring tiles never share a design
+
+const CATS = [
+  ["ecommerce", "E-commerce & D2C", "Consumer", "SHOP"], ["beauty", "Beauty & personal care", "Consumer", "GLOW"], ["fashion", "Fashion & apparel", "Consumer", "STYLE"],
+  ["footwear", "Footwear & bags", "Consumer", "STRIDE"], ["jewellery", "Jewellery & accessories", "Consumer", "GOLD"], ["decor", "Home & decor", "Consumer", "HOME"],
+  ["craft", "Handicraft & gifting", "Consumer", "CRAFT"], ["food", "Food & snacks", "Consumer", "FEAST"], ["drinks", "Drinks", "Consumer", "SIP"],
+  ["alcohol", "Spirits, beer & wine", "Consumer", "SPIRITS"], ["restaurants", "Restaurants & cafés", "Consumer", "TABLE"], ["nutrition", "Health & nutrition", "Consumer", "FUEL"],
+  ["pets", "Pet care", "Consumer", "PAWS"], ["kids", "Kids, baby & toys", "Consumer", "PLAY"], ["fitness", "Sports & fitness", "Consumer", "SPORT"],
+  ["travel", "Travel & experiences", "Consumer", "AWAY"], ["gadgets", "Gadgets & electronics", "Consumer", "GEAR"], ["ev", "EV & mobility", "Consumer", "VOLT"],
+  ["media", "Media, music & creators", "Consumer", "REEL"],
+  ["ai", "AI", "Tech", "MIND"], ["software", "Software & SaaS", "Tech", "CODE"], ["fintech", "Fintech", "Tech", "CASH"], ["health", "Healthtech & medtech", "Tech", "CURE"],
+  ["biotech", "Biotech & life sciences", "Tech", "CELL"], ["edtech", "Edtech & learning", "Tech", "LEARN"], ["climate", "Climate & clean energy", "Tech", "SOLAR"],
+  ["agritech", "Agritech", "Tech", "GROW"], ["deeptech", "Robotics, drones & space", "Tech", "ORBIT"], ["gaming", "Gaming & esports", "Tech", "GAME"],
+  ["logistics", "Logistics & delivery", "Tech", "SHIP"], ["hrtech", "HR & work tech", "Tech", "HIRE"], ["proptech", "Proptech & home services", "Tech", "KEYS"],
+  ["web3", "Web3 & blockchain", "Tech", "CHAIN"],
+];
+const CAT = Object.fromEntries(CATS.map(([id, label, group, word], i) => [id, { id, label, group, word, i }]));
+const SPECIAL = { picks: { label: "Picks", word: "PICKS", i: 40 }, all: { label: "All companies", word: "ALL", i: 41 } };
+/* Each file shows the thing itself as a silhouette. Objects are drawn in a 320x180 box centred on (160,95).
+   m = main ink, a = accent ink, x = the backdrop colour (used for cut-outs). */
+const OBJ = {
+  ecommerce: (m, a, x) => `<path d="M136 66 v-12 a24 24 0 0 1 48 0 v12" fill="none" stroke="${m}" stroke-width="8"/><rect x="114" y="62" width="92" height="86" fill="${m}"/><rect x="114" y="62" width="92" height="12" fill="${a}"/><path d="M146 104 h28 M160 90 v28" stroke="${x}" stroke-width="7"/>`,
+  beauty: (m, a, x) => `<circle cx="200" cy="80" r="44" fill="none" stroke="${m}" stroke-width="9"/><rect x="195" y="124" width="10" height="34" fill="${m}"/><rect x="100" y="100" width="40" height="58" fill="${m}"/><rect x="105" y="80" width="30" height="22" fill="${a}"/><path d="M107 80 V48 Q120 34 133 54 V80Z" fill="${a}"/>`,
+  fashion: (m, a, x) => `<path d="M160 44 a10 10 0 1 1 10 10 q-10 0 -10 12" fill="none" stroke="${m}" stroke-width="6" stroke-linecap="round"/><path d="M160 66 L82 116 H238Z" fill="none" stroke="${m}" stroke-width="9" stroke-linejoin="round"/><path d="M128 116 h64 l18 50 h-100z" fill="${a}"/>`,
+  footwear: (m, a, x) => `<path d="M96 84 q22 -6 36 -32 l38 6 q4 28 44 34 q36 6 44 24 v16 h-162z" fill="${m}"/><rect x="96" y="132" width="162" height="14" fill="${a}"/><path d="M138 70 l16 4 M134 82 l18 4 M130 94 l20 4" stroke="${x}" stroke-width="5" stroke-linecap="round"/>`,
+  jewellery: (m, a, x) => `<circle cx="160" cy="114" r="38" fill="none" stroke="${m}" stroke-width="13"/><path d="M134 66 l12 -18 h28 l12 18 l-26 28z" fill="${a}"/><path d="M134 66 h52 M146 48 l14 18 l14 -18" stroke="${x}" stroke-width="3" fill="none"/>`,
+  decor: (m, a, x) => `<path d="M118 46 h56 l20 48 h-96z" fill="${a}"/><rect x="143" y="94" width="7" height="50" fill="${m}"/><rect x="122" y="144" width="48" height="10" fill="${m}"/><rect x="200" y="112" width="44" height="42" fill="${m}"/><path d="M222 112 q-26 -32 -4 -60 q24 28 4 60" fill="${a}"/>`,
+  craft: (m, a, x) => `<path d="M140 38 h40 v12 q38 20 32 66 q-6 42 -52 42 q-46 0 -52 -42 q-6 -46 32 -66z" fill="${m}"/><path d="M112 92 h96 M110 114 h100" stroke="${a}" stroke-width="8"/><path d="M116 103 l8 -6 l8 6 l8 -6 l8 6 l8 -6 l8 6 l8 -6 l8 6 l8 -6 l8 6 l8 -6 l8 6" stroke="${x}" stroke-width="3" fill="none"/>`,
+  food: (m, a, x) => `<path d="M100 88 q0 -46 60 -46 q60 0 60 46z" fill="${m}"/><rect x="96" y="88" width="128" height="10" fill="${x}"/><rect x="98" y="98" width="124" height="20" fill="${a}"/><rect x="96" y="118" width="128" height="8" fill="${x}"/><path d="M100 126 h120 q0 24 -60 24 q-60 0 -60 -24z" fill="${m}"/><circle cx="138" cy="62" r="3" fill="${x}"/><circle cx="160" cy="56" r="3" fill="${x}"/><circle cx="182" cy="64" r="3" fill="${x}"/>`,
+  drinks: (m, a, x) => `<rect x="168" y="20" width="9" height="62" fill="${a}" transform="rotate(14 172 50)"/><path d="M120 60 h84 l-11 100 h-62z" fill="${m}"/><path d="M125 96 h74 l-7 64 h-60z" fill="${a}"/><circle cx="150" cy="122" r="5" fill="${x}"/><circle cx="172" cy="140" r="4" fill="${x}"/>`,
+  alcohol: (m, a, x) => `<path d="M104 40 h56 q4 54 -28 62 q-32 -8 -28 -62z" fill="${a}"/><rect x="129" y="100" width="7" height="44" fill="${m}"/><rect x="112" y="144" width="42" height="8" fill="${m}"/><path d="M188 154 v-74 q0 -14 13 -23 v-28 h18 v28 q13 9 13 23 v74z" fill="${m}"/><rect x="192" y="98" width="36" height="28" fill="${a}"/>`,
+  restaurants: (m, a, x) => `<path d="M136 52 q-10 -12 0 -22 q10 -10 0 -22 M160 52 q-10 -12 0 -22 q10 -10 0 -22 M184 52 q-10 -12 0 -22 q10 -10 0 -22" stroke="${m}" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M94 82 h132 q0 68 -66 68 q-66 0 -66 -68z" fill="${m}"/><rect x="94" y="80" width="132" height="8" fill="${a}"/><path d="M196 30 l46 80 M212 26 l40 84" stroke="${a}" stroke-width="6" stroke-linecap="round"/>`,
+  nutrition: (m, a, x) => `<g transform="rotate(-30 150 95)"><rect x="92" y="72" width="116" height="46" rx="23" fill="${m}"/><path d="M150 72 h35 a23 23 0 0 1 0 46 h-35z" fill="${a}"/></g><path d="M214 150 q-4 -52 48 -72 q4 54 -48 72z" fill="${m}"/><path d="M218 146 q14 -32 38 -60" stroke="${x}" stroke-width="3" fill="none"/>`,
+  pets: (m, a, x) => `<ellipse cx="156" cy="116" rx="38" ry="32" fill="${m}"/><ellipse cx="110" cy="74" rx="14" ry="18" fill="${m}"/><ellipse cx="140" cy="52" rx="14" ry="19" fill="${m}"/><ellipse cx="174" cy="52" rx="14" ry="19" fill="${m}"/><ellipse cx="204" cy="74" rx="14" ry="18" fill="${m}"/><path d="M244 44 q0 -10 10 -10 q10 0 10 10 q0 10 -20 24 q-20 -14 -20 -24 q0 -10 10 -10 q10 0 10 10" fill="${a}"/>`,
+  kids: (m, a, x) => `<rect x="92" y="98" width="50" height="50" fill="${m}"/><rect x="146" y="98" width="50" height="50" fill="${a}"/><rect x="120" y="44" width="50" height="50" fill="${m}" transform="rotate(10 145 69)"/>` + txt(117, 136, 36, x, "A", `text-anchor="middle"`) + txt(171, 136, 36, x, "B", `text-anchor="middle"`) + txt(145, 82, 36, x, "C", `text-anchor="middle" transform="rotate(10 145 69)"`) + `<circle cx="232" cy="126" r="22" fill="${a}"/><path d="M210 126 h44 M232 104 q-12 22 0 44" stroke="${x}" stroke-width="3" fill="none"/>`,
+  fitness: (m, a, x) => `<g transform="rotate(-18 160 92)"><rect x="96" y="86" width="128" height="12" fill="${m}"/><rect x="90" y="60" width="20" height="64" fill="${a}"/><rect x="70" y="70" width="18" height="44" fill="${a}"/><rect x="210" y="60" width="20" height="64" fill="${a}"/><rect x="232" y="70" width="18" height="44" fill="${a}"/></g>`,
+  travel: (m, a, x) => `<path d="M100 180 a60 60 0 0 1 120 0z" fill="${a}"/><path d="M30 150 q70 -110 260 -100" stroke="${m}" stroke-width="2.5" stroke-dasharray="6 7" fill="none"/><path d="M192 60 l64 -20 q12 -2 10 8 l-52 32 l-6 36 l-12 4 l-2 -32 l-32 17 l-4 14 l-10 2 l2 -23 l-18 -10 l8 -6 l18 6 z" fill="${m}"/>`,
+  gadgets: (m, a, x) => `<path d="M106 110 v-16 a54 54 0 0 1 108 0 v16" fill="none" stroke="${m}" stroke-width="11"/><rect x="92" y="98" width="32" height="52" rx="6" fill="${a}"/><rect x="196" y="98" width="32" height="52" rx="6" fill="${a}"/>`,
+  ev: (m, a, x) => `<circle cx="104" cy="130" r="30" fill="none" stroke="${m}" stroke-width="11"/><circle cx="224" cy="130" r="30" fill="none" stroke="${m}" stroke-width="11"/><path d="M104 130 l50 -44 h40 l30 44" stroke="${m}" stroke-width="7" fill="none" stroke-linejoin="round"/><path d="M178 14 l-40 64 h28 l-12 52 l46 -72 h-28z" fill="${a}"/>`,
+  media: (m, a, x) => `<rect x="88" y="70" width="116" height="80" fill="${m}"/><path d="M88 60 l108 -22 l4 18 l-108 22z" fill="${a}"/><path d="M110 56 l10 14 M138 50 l10 14 M166 44 l10 14" stroke="${x}" stroke-width="6"/><circle cx="146" cy="110" r="20" fill="${a}"/><path d="M140 100 l16 10 l-16 10z" fill="${m}"/><path d="M226 62 v52 a12 12 0 1 1 -6 -10 v-36 l28 -8 v40 a12 12 0 1 1 -6 -10 v-36z" fill="${m}"/>`,
+  ai: (m, a, x) => `<path d="M60 92 Q160 10 260 92 Q160 174 60 92Z" fill="${m}"/><circle cx="160" cy="92" r="38" fill="${a}"/><circle cx="160" cy="92" r="17" fill="${x}"/><circle cx="168" cy="84" r="6" fill="${m}"/><path d="M160 40 v-26 M110 52 l-14 -18 M210 52 l14 -18" stroke="${m}" stroke-width="4"/>`,
+  software: (m, a, x) => `<rect x="76" y="40" width="168" height="112" fill="${m}"/><rect x="76" y="40" width="168" height="18" fill="${a}"/><circle cx="88" cy="49" r="3.5" fill="${x}"/><circle cx="99" cy="49" r="3.5" fill="${x}"/><circle cx="110" cy="49" r="3.5" fill="${x}"/>` + txt(160, 126, 56, x, "&lt;/&gt;", `text-anchor="middle"`),
+  fintech: (m, a, x) => [0, 1, 2, 3, 4].map((i) => `<ellipse cx="124" cy="${150 - i * 15}" rx="40" ry="11" fill="${i % 2 ? a : m}"/>`).join("") + `<path d="M178 146 l40 -50 l20 18 l36 -62" stroke="${m}" stroke-width="10" fill="none" stroke-linejoin="round"/><path d="M262 40 l18 8 l-2 -22z" fill="${m}"/>`,
+  health: (m, a, x) => `<circle cx="160" cy="92" r="56" fill="${a}"/><path d="M146 54 h28 v24 h24 v28 h-24 v24 h-28 v-24 h-24 v-28 h24z" fill="${m}"/><path d="M232 42 q0 -9 9 -9 q9 0 9 9 q0 9 -18 21 q-18 -12 -18 -21 q0 -9 9 -9 q9 0 9 9" fill="${m}"/>`,
+  biotech: (m, a, x) => { let o = "", p = "", q = ""; for (let X = 70; X <= 250; X += 15) o += `<path d="M${X} ${(92 + 36 * Math.sin((X - 70) / 30)).toFixed(1)} L${X} ${(92 - 36 * Math.sin((X - 70) / 30)).toFixed(1)}" stroke="${m}" stroke-width="3" opacity="0.6"/>`;
+    for (let X = 70; X <= 250; X += 4) { p += `${X === 70 ? "M" : "L"}${X} ${(92 + 36 * Math.sin((X - 70) / 30)).toFixed(1)}`; q += `${X === 70 ? "M" : "L"}${X} ${(92 - 36 * Math.sin((X - 70) / 30)).toFixed(1)}`; }
+    return o + `<path d="${p}" stroke="${m}" stroke-width="8" fill="none"/><path d="${q}" stroke="${a}" stroke-width="8" fill="none"/>`; },
+  edtech: (m, a, x) => `<rect x="84" y="138" width="74" height="12" fill="${a}"/><rect x="90" y="126" width="74" height="12" fill="${m}"/><rect x="82" y="114" width="74" height="12" fill="${a}"/><path d="M204 50 l68 28 l-68 28 l-68 -28z" fill="${m}"/><path d="M170 92 v26 q34 18 68 0 v-26 l-34 14z" fill="${m}"/><path d="M262 84 v36" stroke="${a}" stroke-width="4"/><circle cx="262" cy="124" r="6" fill="${a}"/>`,
+  climate: (m, a, x) => `<path d="M24 180 a60 60 0 0 1 120 0z" fill="${a}"/><rect x="196" y="74" width="8" height="106" fill="${m}"/><path d="M200 72 L200 10 Q208 40 204 72Z M200 72 L254 104 Q226 92 200 76Z M200 72 L146 104 Q170 86 200 71Z" fill="${m}"/><circle cx="200" cy="72" r="6" fill="${a}"/>`,
+  agritech: (m, a, x) => `<path d="M92 180 a68 68 0 0 1 136 0z" fill="${a}"/><path d="M160 124 v-58" stroke="${m}" stroke-width="8"/><path d="M160 88 q-46 -6 -50 -44 q44 0 50 44z" fill="${m}"/><path d="M160 74 q42 -8 48 -42 q-42 2 -48 42z" fill="${m}"/>`,
+  deeptech: (m, a, x) => `<g transform="rotate(35 160 92)"><path d="M160 18 q26 24 26 68 v40 h-52 v-40 q0 -44 26 -68z" fill="${m}"/><path d="M160 18 q15 13 21 32 h-42 q6 -19 21 -32z" fill="${a}"/><circle cx="160" cy="76" r="10" fill="${x}"/><path d="M134 102 l-20 28 h20z M186 102 l20 28 h-20z" fill="${a}"/><path d="M144 126 h32 l-16 36z" fill="${a}"/></g><circle cx="262" cy="42" r="16" fill="${m}"/><circle cx="60" cy="140" r="4" fill="${m}"/><circle cx="80" cy="40" r="3" fill="${m}"/>`,
+  gaming: (m, a, x) => `<path d="M106 68 h108 q36 0 40 48 q2 32 -24 32 q-14 0 -28 -24 h-84 q-14 24 -28 24 q-26 0 -24 -32 q4 -48 40 -48z" fill="${m}"/><path d="M116 96 h30 M131 81 v30" stroke="${x}" stroke-width="9"/><circle cx="198" cy="88" r="8" fill="${a}"/><circle cx="214" cy="106" r="8" fill="${a}"/><circle cx="182" cy="106" r="8" fill="${x}"/>`,
+  logistics: (m, a, x) => [0, 1, 2, 3].map((i) => `<rect x="${40 + i * 6}" y="${76 + i * 14}" width="${70 - i * 10}" height="5" fill="${m}"/>`).join("") + `<path d="M150 64 l52 -26 l52 26 l-52 26z" fill="${a}"/><path d="M150 64 l52 26 v58 l-52 -26z" fill="${m}"/><path d="M202 90 l52 -26 v58 l-52 26z" fill="${m}" opacity="0.8"/><path d="M176 51 l52 26" stroke="${x}" stroke-width="6"/>`,
+  hrtech: (m, a, x) => [[108, m], [160, a], [212, m]].map(([X, c], i) => `<circle cx="${X}" cy="${i === 1 ? 64 : 74}" r="21" fill="${c}"/><path d="M${X - 34} 154 q0 -48 34 -48 q34 0 34 48z" fill="${c}"/>`).join(""),
+  proptech: (m, a, x) => `<path d="M82 98 l62 -52 l62 52 v58 h-124z" fill="${m}"/><rect x="128" y="112" width="30" height="44" fill="${a}"/><circle cx="246" cy="76" r="19" fill="none" stroke="${a}" stroke-width="10"/><path d="M246 95 v58 M246 134 h15 M246 146 h11" stroke="${a}" stroke-width="10"/>`,
+  web3: (m, a, x) => [[64, m, a], [132, a, m], [200, m, a]].map(([X, t, s], i) => `<path d="M${X} ${86 - (i === 1 ? 24 : 0)} l36 -18 l36 18 l-36 18z" fill="${t}"/><path d="M${X} ${86 - (i === 1 ? 24 : 0)} l36 18 v40 l-36 -18z" fill="${s}"/><path d="M${X + 36} ${104 - (i === 1 ? 24 : 0)} l36 -18 v40 l-36 18z" fill="${t}" opacity="0.75"/>`).join("") + `<path d="M126 110 l14 -6 M194 104 l12 6" stroke="${m}" stroke-width="5"/>`,
+  picks: (m, a, x) => { let d = ""; for (let i = 0; i < 16; i++) { const ang = (i / 16) * Math.PI * 2 - Math.PI / 2, r = i % 2 ? 30 : 66; d += `${i ? "L" : "M"}${(160 + r * Math.cos(ang)).toFixed(1)} ${(92 + r * Math.sin(ang)).toFixed(1)}`; } return `<path d="${d}Z" fill="${a}"/><circle cx="160" cy="92" r="20" fill="${m}"/>` + txt(160, 101, 26, x, "1", `text-anchor="middle"`); },
+  all: (m, a, x) => `<circle cx="160" cy="92" r="48" fill="${m}"/><ellipse cx="160" cy="96" rx="96" ry="17" fill="none" stroke="${a}" stroke-width="8" transform="rotate(-14 160 96)"/><circle cx="262" cy="40" r="10" fill="${a}"/>`,
+  brands: (m, a, x) => `<path d="M112 70 h96 l10 86 h-116z" fill="${m}"/><path d="M134 72 v-14 a26 26 0 0 1 52 0 v14" fill="none" stroke="${m}" stroke-width="8"/><circle cx="134" cy="84" r="5" fill="${a}"/><circle cx="186" cy="84" r="5" fill="${a}"/><rect x="124" y="108" width="72" height="22" fill="${a}"/>` + txt(160, 124, 14, x, "D2C", `text-anchor="middle" letter-spacing="2"`),
+  list: (m, a, x) => `<path d="M90 56 h50 l10 12 h80 v84 h-140z" fill="${m}"/><rect x="90" y="76" width="140" height="76" fill="${m}"/><path d="M90 76 h140" stroke="${x}" stroke-width="3"/><rect x="150" y="104" width="68" height="22" fill="none" stroke="${a}" stroke-width="3" transform="rotate(-8 184 115)"/>` + txt(184, 121, 15, a, "CLASSIFIED", `text-anchor="middle" letter-spacing="1" transform="rotate(-8 184 115)"`),
+};
+const SHORT = { ecommerce: "E-commerce", beauty: "Beauty", fashion: "Fashion", footwear: "Footwear & bags", jewellery: "Jewellery", decor: "Home decor", craft: "Handicraft",
+  food: "Food", drinks: "Drinks", alcohol: "Spirits", restaurants: "Restaurants", nutrition: "Nutrition", pets: "Pets", kids: "Kids & toys", fitness: "Sports",
+  travel: "Travel", gadgets: "Gadgets", ev: "EV & mobility", media: "Media", ai: "AI", software: "Software", fintech: "Fintech", health: "Healthtech", biotech: "Biotech",
+  edtech: "Edtech", climate: "Climate", agritech: "Agritech", deeptech: "Space & robotics", gaming: "Gaming", logistics: "Logistics", hrtech: "HR tech",
+  proptech: "Proptech", web3: "Web3", picks: "Picks", all: "All files" };
+
+/* Four poster stagings: spotlight, half-moon, horizon, diagonal. Object sits right, name sits left. */
+function stage(k, objFn, name, id) {
+  const nm = esc(name.toUpperCase()), long = nm.length > 10, size = long ? 30 : 46;
+  const words = long ? nm.split(" ") : [nm];
+  const lines = (fill, x, y) => words.slice(0, 3).map((w, i) => w.length * size * 0.42 > 120 ? fit(x, y + i * (size * 0.92), 120, size, fill, w) : txt(x, y + i * (size * 0.92), size, fill, w)).join("");
+  const place = (inner) => `<g transform="translate(205 ${k === 3 ? 82 : 92}) scale(${k === 3 ? 0.6 : 0.68}) translate(-160 -92)">${inner}</g>`;
+  if (k === 0) return `<rect width="320" height="180" fill="${K}"/><g class="beam"><path d="M196 0 h18 l84 180 h-186z" fill="${W}" opacity="0.13"/></g><ellipse cx="205" cy="160" rx="80" ry="12" fill="${R}"/>`
+    + place(objFn(W, R, K)) + lines(W, 16, 46 + (long ? 0 : 6)) + `<rect x="16" y="${long ? 46 + words.length * size * 0.92 - 14 : 66}" width="40" height="4" fill="${R}"/>`;
+  if (k === 1) return `<rect width="320" height="180" fill="${R}"/><circle cx="215" cy="92" r="82" fill="${K}"/>` + place(objFn(W, R, K)) + lines(W, 16, 46);
+  if (k === 2) return `<rect width="320" height="180" fill="${K}"/><rect y="132" width="320" height="48" fill="${R}"/>` + place(objFn(W, R, K)) + lines(R, 16, 46);
+  return `<rect width="320" height="180" fill="${W}"/><path d="M0 150 L320 120 V180 H0Z" fill="${R}"/><rect x="296" y="0" width="24" height="180" fill="${K}"/>` + place(objFn(K, R, W)) + lines(K, 16, 46);
+}
+function card(id, n = 0, listName) {
+  const isList = String(id).startsWith("l-");
+  const key = isList ? "list" : OBJ[id] ? id : "all";
+  const name = isList ? (listName || "List") : SHORT[id] || catLabel(id);
+  const k = isList ? 1 : (COMP_OF[id] ?? [...String(id)].reduce((s, c) => s + c.charCodeAt(0), 0)) % 4;
+  // the diagonal staging puts the object on white and red: keep the accent black there so it reads
+  const fn = k === 3 ? (m, a, x) => OBJ[key](K, R, W) : OBJ[key];
+  return `<svg class="card" viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice" aria-hidden="true">${stage(k, fn, name, id)}</svg>`;
+}
+
+/* ================= State ================= */
+const MONTHS = "Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec".split(" ");
+const PAGE = 100;
+let ALL = [], byCin = new Map(), counts = {}, view = "", listId = "", shown = PAGE, openCin = null;
+let lists = new Map(), items = new Map(), notes = new Map();   // items: key list__cin -> {list,cin,by,at}
+let db = null, sb = null, me = "", canWrite = true;
+const CFG = window.RADAR_CONFIG || {};
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const monthLabel = (m) => m ? `${MONTHS[+m.slice(5) - 1]} ${m.slice(0, 4)}` : "";
+const title = (s) => s.toLowerCase().replace(/(^|[\s(&./-])([a-z])/g, (m, a, b) => a + b.toUpperCase());
+const shortName = (n) => title(n).replace(/\s*\(opc\)/i, "").replace(/\s+(private limited|pvt\.? ltd\.?|limited)$/i, "").trim();
+const nameOf = (r) => r.b ? r.n : shortName(r.n);
+const kfmt = (n) => n >= 1e6 ? (n / 1e6).toFixed(n >= 1e7 ? 0 : 1) + "M" : n >= 1e3 ? Math.round(n / 1e3) + "K" : String(n);
+const STAGES = [["new", "Just incorporated"], ["early", "Early stage"], ["growing", "Growing"], ["scaled", "Scaled"]];
+const stageOf = (r) => !r.b ? "new" : (r.igf || 0) >= 500000 ? "scaled" : (r.igf || 0) >= 50000 ? "growing" : "early";
+const stageLabel = (r) => STAGES.find(([k]) => k === stageOf(r))[1];
+const g = (q) => "https://www.google.com/search?q=" + encodeURIComponent(q);
+const fmt = (n) => n.toLocaleString("en-IN");
+const catLabel = (id) => CAT[id]?.label || SPECIAL[id]?.label || "";
+const listsOf = (cin) => [...items.values()].filter((x) => x.cin === cin && lists.has(x.list)).map((x) => x.list);
+const listCount = (lid) => [...items.values()].filter((x) => x.list === lid).length;
+const sortedLists = () => [...lists.entries()].sort((a, b) => (b[1].at || "").localeCompare(a[1].at || ""));
+const fileNo = (id) => String((CAT[id]?.i ?? 32) + 1).padStart(3, "0");
+
+/* ================= Home ================= */
+function fileTile(id) {
+  const n = counts[id] || 0;
+  return `<a class="file" href="#${id}"><span class="frame">${card(id, n)}</span><span class="cap"><b>${esc(catLabel(id))}</b><span>${fmt(n)}</span></span></a>`;
+}
+function listTile(lid, l) {
+  const n = listCount(lid);
+  return `<a class="file" href="#l-${esc(lid)}"><span class="frame">${card("l-" + lid, n, l.name, 5)}</span><span class="cap"><b>${esc(l.name)}</b><span>${fmt(n)}</span></span><span class="no">Team list</span></a>`;
+}
+function newListTile() {
+  if (!db) return `<div class="file newlist"><span class="frame"><span class="meta" style="padding:16px;text-align:center">Team lists are offline. Reload the page to reconnect.</span></span></div>`;
+  return `<div class="file newlist"><span class="frame"><form id="newListForm"><span class="plus">+</span><input id="newListName" maxlength="60" placeholder="Name a new list" aria-label="New list name" ${canWrite ? "" : "disabled"}><button class="red" ${canWrite ? "" : "disabled"}>Create list</button></form></span><span class="cap"><b>New list</b><span></span></span></div>`;
+}
+function renderHome() {
+  const months = [...new Set(ALL.map((r) => r.m).filter(Boolean))].sort();
+  const withF = ALL.filter((r) => r.f).length, nB = counts.brands || 0;
+  const group = (grp) => CATS.filter((c) => c[2] === grp).map((c) => c[0]).sort((a, b) => (counts[b] || 0) - (counts[a] || 0));
+  const sum = (grp) => group(grp).reduce((s, id) => s + (counts[id] || 0), 0);
+  $("app").innerHTML = `
+    <section class="hero"><div class="copy">
+      <span class="eyebrow">Classified · MCA incorporations</span>
+      <h1>The Register<span class="flip"><span>The Register</span></span></h1>
+      <p>Every company incorporated in India from ${monthLabel(months[0])} to ${monthLabel(months.at(-1))}, filed into ${CATS.length} categories, with founders, websites and lists your team builds together. Plus ${fmt(nB)} younger D2C brands that are already selling, staged by their Instagram reach.</p>
+      <div class="facts"><div><b>${fmt(ALL.length)}</b><span>Companies</span></div><div><b>${fmt(withF)}</b><span>With founders</span></div><div><b>${CATS.length}</b><span>Files</span></div></div>
+    </div><div class="art"><svg class="card" viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice" aria-hidden="true">${COMPOSE[3]("", 0, "hero")}</svg></div></section>
+
+    <div class="shead"><h2>Team <em>lists</em></h2><span>${lists.size ? `${lists.size} list${lists.size > 1 ? "s" : ""}` : "Make a list, then add companies to it from any file"}</span></div>
+    <div class="wall" id="listWall">${newListTile()}${sortedLists().map(([lid, l]) => listTile(lid, l)).join("")}${fileTile("picks")}</div>
+
+    <div class="shead"><h2>Consumer <em>brands</em></h2><span>${fmt(sum("Consumer"))} companies · ${group("Consumer").length} files</span></div>
+    <div class="wall">${group("Consumer").map(fileTile).join("")}</div>
+
+    <div class="shead"><h2>Tech <em>startups</em></h2><span>${fmt(sum("Tech"))} companies · ${group("Tech").length} files</span></div>
+    <div class="wall">${group("Tech").map(fileTile).join("")}${fileTile("all")}</div>
+
+    <p class="foot">Filing method: each company is placed by its registered business activity (NIC code) and its name. Directors come from public company records and can take weeks to appear for new companies. Websites marked "possible" were matched by name only. February 2026 is missing from the source files. Stage: "Just incorporated" is every new MCA company; D2C brands from the team's D2CStory list are early stage under 50K Instagram followers, growing from 50K, and scaled from 500K. Most of those brands were filed from what the brand is known for rather than its website, so check the file before relying on it.</p>`;
+  const f = $("newListForm");
+  if (f) f.onsubmit = async (e) => { e.preventDefault(); const name = $("newListName").value.trim(); if (!name) return; const id = await createList(name); if (id) location.hash = "l-" + id; };
+}
+
+/* ================= Case view ================= */
+function inView(r) {
+  if (view === "all") return true;
+  if (view === "picks") return !!r.p;
+  if (view === "list") return items.has(listId + "__" + r.c);
+  return r.cat === view;
+}
+const multi = () => ["all", "picks", "list"].includes(view);
+
+function renderCase(q = "") {
+  const isList = view === "list", l = lists.get(listId);
+  if (isList && !l) { $("app").innerHTML = `<a class="back" href="#">&larr; Back to the files</a><p class="empty-state">This list was deleted or hasn't loaded yet.</p>`; return; }
+  const name = isList ? l.name : catLabel(view);
+  const total = ALL.filter(inView).length;
+  const blurb = isList ? `A team list. Add companies from any file using "Add to list" in the company's dossier.`
+    : view === "picks" ? "Hand-picked companies that stood out: unusual ideas, a live website or a clear product."
+    : view === "all" ? "Every company in the register, across all files."
+    : `${CAT[view].group === "Tech" ? "Tech startups" : "Consumer brands"} filed under ${CAT[view].label.toLowerCase()}, by business-activity code and name.`;
+  $("app").innerHTML = `
+    <a class="back" href="#">&larr; Back to the files</a>
+    <section class="titlecard"><div class="copy">
+      <span class="eyebrow">${isList ? "Team list" : SPECIAL[view] ? "Special file" : `File ${fileNo(view)} · ${CAT[view].group}`}</span>
+      <h1>${esc(name)}</h1><p>${esc(blurb)}</p>
+      <div class="tools" id="tools">${isList && db && canWrite ? `<button id="renameBtn">Rename</button><button id="delBtn">Delete list</button>` : ""}</div>
+    </div><div class="art">${isList ? card("l-" + listId, total, l.name, 0) : card(view, total)}</div></section>
+    <div class="controls">
+      <input type="search" id="q" placeholder="Search company, founder, DIN or CIN" aria-label="Search this file" value="${esc(q)}">
+      ${multi() ? `<select id="fCat" aria-label="Category"></select>` : ""}
+      <select id="fStage" aria-label="Stage"><option value="">All stages</option>${STAGES.map(([k, t]) => `<option value="${k}">${t}</option>`).join("")}</select>
+      <select id="fMonth" aria-label="Month"></select>
+      <select id="fState" aria-label="State"></select>
+      <label class="chk"><input type="checkbox" id="fWeb"> Has website</label>
+      <label class="chk"><input type="checkbox" id="fFounders"> Founders found</label>
+      <select id="sort" aria-label="Sort"><option value="score">Sort: best match</option><option value="new">Sort: newest</option><option value="name">Sort: A–Z</option></select>
+    </div>
+    <div class="count"><span id="count"></span><span>Click a company to open its dossier</span></div>
+    <div class="register${multi() ? " withcat" : ""}" id="list" role="list"></div>
+    <div class="more"><button id="moreBtn" class="red" hidden>Show more</button></div>`;
+  refreshFilters();
+  let qt; $("q").addEventListener("input", () => { clearTimeout(qt); qt = setTimeout(() => { shown = PAGE; renderRows(); }, 150); });
+  for (const fid of ["fCat", "fStage", "fMonth", "fState", "fWeb", "fFounders", "sort"]) $(fid)?.addEventListener("change", () => { shown = PAGE; renderRows(); });
+  $("moreBtn").onclick = () => { shown += PAGE; renderRows(); };
+  $("list").addEventListener("click", (e) => { const row = e.target.closest(".row[data-cin]"); if (row) openSheet(row.dataset.cin); });
+  $("list").addEventListener("keydown", (e) => { if (e.key === "Enter") { const row = e.target.closest(".row[data-cin]"); if (row) openSheet(row.dataset.cin); } });
+  if ($("renameBtn")) $("renameBtn").onclick = renameUI;
+  if ($("delBtn")) $("delBtn").onclick = deleteUI;
+  renderRows();
+}
+
+function renameUI() {
+  const l = lists.get(listId);
+  $("tools").innerHTML = `<form class="inline" id="renForm" style="width:100%"><input id="renName" maxlength="60" value="${esc(l.name)}" aria-label="List name"><button class="red">Save name</button><button type="button" id="renCancel">Cancel</button></form>`;
+  $("renName").focus();
+  $("renCancel").onclick = () => renderCase($("q")?.value || "");
+  $("renForm").onsubmit = async (e) => {
+    e.preventDefault(); const name = $("renName").value.trim(); if (!name) return;
+    const { error } = await sb.from("lists").update({ name }).eq("id", listId);
+    if (error) return toast("Couldn't rename. Try again.");
+    lists.get(listId).name = name; toast("List renamed"); renderCase();
+  };
+}
+function deleteUI() {
+  const n = listCount(listId);
+  $("tools").innerHTML = `<div class="confirm">Delete this list${n ? ` and its ${n} entr${n > 1 ? "ies" : "y"}` : ""}? This can't be undone. <button class="red" id="delYes">Delete</button><button id="delNo">Keep it</button></div>`;
+  $("delNo").onclick = () => renderCase($("q")?.value || "");
+  $("delYes").onclick = async () => {
+    const lid = listId;
+    const { error } = await sb.from("lists").delete().eq("id", lid);   // its entries go with it
+    if (error) return toast("Couldn't delete the list. Try again.");
+    lists.delete(lid); for (const k of [...items.keys()]) if (k.startsWith(lid + "__")) items.delete(k);
+    refreshSheet(); toast("List deleted"); location.hash = "";
+  };
+}
+
+function fill(sel, label, values) {
+  if (!sel) return;
+  const cur = sel.value;
+  sel.innerHTML = `<option value="">${esc(label)}</option>` + values.map(([v, t]) => `<option value="${esc(v)}">${esc(t)}</option>`).join("");
+  if (values.some(([v]) => v === cur)) sel.value = cur;
+}
+function refreshFilters() {
+  const rows = ALL.filter(inView), uniq = (f) => [...new Set(rows.map(f).filter(Boolean))];
+  fill($("fCat"), "All files", uniq((r) => r.cat).sort((a, b) => catLabel(a).localeCompare(catLabel(b))).map((c) => [c, catLabel(c)]));
+  fill($("fMonth"), "All months", uniq((r) => r.m).sort().reverse().map((m) => [m, monthLabel(m)]));
+  fill($("fState"), "All states", uniq((r) => r.s).sort().map((s) => [s, s]));
+}
+function filtered() {
+  const q = $("q").value.trim().toLowerCase(), c = $("fCat")?.value || "", m = $("fMonth").value, s = $("fState").value;
+  const web = $("fWeb").checked, fo = $("fFounders").checked, st = $("fStage")?.value || "";
+  const rows = ALL.filter((r) => inView(r) && (!c || r.cat === c) && (!m || r.m === m) && (!s || r.s === s) && (!web || r.w) && (!st || stageOf(r) === st) && (!fo || r.f) && (!q || r._q.includes(q)));
+  const sort = $("sort").value, dkey = (r) => (r.r || "").split("-").reverse().join("");
+  if (view === "list" && sort === "score") rows.sort((a, b) => (items.get(listId + "__" + b.c)?.at || "").localeCompare(items.get(listId + "__" + a.c)?.at || ""));
+  else if (sort === "new") rows.sort((a, b) => dkey(b).localeCompare(dkey(a)));
+  else if (sort === "name") rows.sort((a, b) => a.n.localeCompare(b.n));
+  else if (view === "picks") rows.sort((a, b) => (b.wv || 0) - (a.wv || 0) || (b.sc || 0) - (a.sc || 0));
+  return rows;
+}
+const scoreHtml = (sc) => sc ? `<span class="score" title="Score ${sc}">${Array.from({ length: 5 }, (_, i) => `<i class="${i < Math.round(sc / 2.2) ? "on" : ""}"></i>`).join("")}${esc(sc)}</span>` : `<span class="small">–</span>`;
+function listTags(cin) {
+  const ls = listsOf(cin);
+  return ls.length ? `<span class="tags">${ls.map((lid) => `<span class="tag">${esc(lists.get(lid).name)}</span>`).join("")}</span>` : `<span class="tag none">Not on a list</span>`;
+}
+function rowHtml(r) {
+  const web = r.w ? `<span class="web">${esc(r.w)}</span>${r.wv ? "" : " <span class='small'>(possible)</span>"}` : "";
+  const what = [r.d ? esc(r.d) : "", web].filter(Boolean).join(" · ");
+  return `<div class="row" role="listitem" tabindex="0" data-cin="${esc(r.c)}">
+    <div class="c-name"><div class="co">${esc(nameOf(r))}${r.p && view !== "picks" ? `<span class="pick">Pick</span>` : ""}</div>${what ? `<div class="what">${what}</div>` : ""}</div>
+    <div class="c-founders founders ${r.f || r.b ? "" : "none"}">${r.b ? `<span class="tag brand">D2C · ${stageLabel(r)}</span>${r.igf ? ` <span class="small">${kfmt(r.igf)} on Instagram</span>` : ""}` : r.f ? esc(r.f) : "Not found yet"}</div>
+    ${multi() ? `<div class="c-cat cat">${esc(catLabel(r.cat))}</div>` : ""}
+    <div class="c-month mono">${r.b ? "–" : esc(monthLabel(r.m))}</div>
+    <div class="c-meta small">${r.b ? "" : `${esc(r.s || "")}<span class="m-inline"> · ${esc(monthLabel(r.m))}</span>`}</div>
+    <div class="c-score">${scoreHtml(r.sc)}</div>
+    <div class="c-lists">${listTags(r.c)}</div>
+  </div>`;
+}
+function renderRows() {
+  if (!$("list")) return;
+  const rows = filtered(), total = ALL.filter(inView).length;
+  $("count").innerHTML = `<b>${fmt(rows.length)}</b> of ${fmt(total)} companies`;
+  const head = `<div class="row head"><div>Company</div><div>Founders / directors</div>${multi() ? "<div>File</div>" : ""}<div>Incorporated</div><div>State</div><div>Score</div><div>Lists</div></div>`;
+  $("list").innerHTML = head + (rows.length ? rows.slice(0, shown).map(rowHtml).join("")
+    : `<div class="empty-state">${view === "list" ? "This list is empty. Open any company and use “Add to list”." : "No companies match these filters."}</div>`);
+  $("moreBtn").hidden = rows.length <= shown;
+  $("moreBtn").textContent = `Show ${fmt(Math.min(PAGE, rows.length - shown))} more`;
+}
+
+/* ================= Routing ================= */
+function route(q = "") {
+  const h = decodeURIComponent(location.hash.slice(1));
+  if (h.startsWith("l-")) { view = "list"; listId = h.slice(2); }
+  else { view = CAT[h] || SPECIAL[h] ? h : ""; listId = ""; }
+  shown = PAGE;
+  if (!view) renderHome(); else renderCase(q);
+  scrollTo(0, 0);
+}
+window.addEventListener("hashchange", () => route());
+let gqt; $("gq").addEventListener("input", () => {
+  clearTimeout(gqt);
+  gqt = setTimeout(() => {
+    const q = $("gq").value.trim(); if (!q) return;
+    if (view !== "all") { history.replaceState(null, "", "#all"); view = "all"; listId = ""; shown = PAGE; renderCase(q); }
+    else { $("q").value = q; shown = PAGE; renderRows(); }
+  }, 250);
+});
+
+/* ================= Dossier sheet ================= */
+async function whoName(email) {
+  if (!email) return "";
+  return email === me ? "you" : email.split("@")[0];
+}
+function listBox(cin) {
+  if (!db) return `<div class="box"><h3>Lists</h3><span class="meta">Team lists are offline. Reload the page to reconnect.</span></div>`;
+  const mine = new Set(listsOf(cin)), locked = !canWrite;
+  return `<div class="box" id="listBox"><h3>Add to list <small>${mine.size ? `On ${mine.size} list${mine.size > 1 ? "s" : ""}` : "On no lists"}</small></h3>
+    ${lists.size ? `<div class="listpick" id="listPick">${sortedLists().map(([lid, l]) => `<button type="button" data-l="${esc(lid)}" aria-pressed="${mine.has(lid)}" ${locked ? "disabled" : ""}>${esc(l.name)}</button>`).join("")}</div>` : `<span class="meta">No lists yet. Name one below and this company goes straight onto it.</span>`}
+    <form class="inline" id="quickList"><input id="quickName" maxlength="60" placeholder="New list name" aria-label="New list name" ${locked ? "disabled" : ""}><button class="red" ${locked ? "disabled" : ""}>Create and add</button></form>
+    ${locked ? `<span class="meta">You have view-only access, so you can't change lists.</span>` : ""}</div>`;
+}
+function wireListBox(cin) {
+  const pick = $("listPick");
+  if (pick) pick.onclick = async (e) => {
+    const b = e.target.closest("button[data-l]"); if (!b || b.disabled) return;
+    const on = b.getAttribute("aria-pressed") === "true"; b.disabled = true;
+    try { await toggleItem(b.dataset.l, cin, !on); b.setAttribute("aria-pressed", String(!on)); toast(on ? "Removed from list" : `Added to ${lists.get(b.dataset.l)?.name || "list"}`); }
+    catch (err) { failToast(err); } finally { b.disabled = !canWrite; }
+  };
+  const f = $("quickList");
+  if (f) f.onsubmit = async (e) => {
+    e.preventDefault(); const name = $("quickName").value.trim(); if (!name) return;
+    const lid = await createList(name); if (!lid) return;
+    try { await toggleItem(lid, cin, true); toast(`Added to ${name}`); } catch (err) { failToast(err); }
+  };
+}
+function openSheet(cin) {
+  const r = byCin.get(cin); if (!r) return;
+  openCin = cin;
+  const founders = (r.f || "").split(",").map((s) => s.trim()).filter(Boolean), dins = (r.din || "").split(",").map((s) => s.trim());
+  const nm = nameOf(r), note = notes.get(cin) || {};
+  const fRows = founders.length ? founders.map((f, i) => `<div>${esc(f)}${dins[i] ? ` <span class="mono small">DIN ${esc(dins[i])}</span>` : ""} · <a href="${g(`${f} ${nm} linkedin`)}" target="_blank" rel="noopener">LinkedIn</a></div>`).join("")
+    : `<span class="small">Not in public records yet. New companies often take a few weeks to show their directors.</span>`;
+  $("sheet").innerHTML = `
+    <div class="art">${card(r.cat, counts[r.cat] || 0)}<button class="close" id="closeSheet">Close</button></div>
+    <div class="body">
+      <div><span class="stamp">${esc(catLabel(r.cat))}${r.p ? " · Pick" : ""}${r.b ? " · " + stageLabel(r) : ""}</span><h2>${esc(nm)}</h2>${r.d ? `<div class="pitch">${esc(r.d)}</div>` : ""}</div>
+      ${r.b ? brandFacts(r) : `<dl class="facts">
+        <dt>Founders</dt><dd style="display:grid;gap:6px">${fRows}</dd>
+        <dt>Website</dt><dd>${r.w ? `<a href="https://${esc(r.w)}" target="_blank" rel="noopener">${esc(r.w)}</a>${r.wv ? "" : ` <span class="small">(matched by name, check it)</span>`}` : `<span class="small">None found</span>`}</dd>
+        ${r.e ? `<dt>Web check</dt><dd>${esc(r.e)}</dd>` : ""}
+        <dt>Incorporated</dt><dd class="mono">${esc(r.r || monthLabel(r.m))}</dd>
+        <dt>State</dt><dd>${esc(r.s || "")}</dd>
+        <dt>NIC code</dt><dd class="mono">${esc(r.nic || "")}</dd>
+        <dt>CIN</dt><dd class="mono">${esc(r.c)}</dd>
+        ${r.sc ? `<dt>Score</dt><dd>${scoreHtml(r.sc)}</dd>` : ""}
+      </dl>`}
+      <div class="links">
+        <a href="${g(nm)}" target="_blank" rel="noopener">Google</a>
+        <a href="${g(`${nm} site:linkedin.com`)}" target="_blank" rel="noopener">LinkedIn</a>
+        <a href="${g(`${nm} site:instagram.com`)}" target="_blank" rel="noopener">Instagram</a>
+        ${r.b ? `<a href="${g(`${nm} founder`)}" target="_blank" rel="noopener">Founders</a>` : `<a href="https://www.credonex.com/company/c-${encodeURIComponent(r.c)}" target="_blank" rel="noopener">Company record</a>`}
+        <a href="https://tmrsearch.ipindia.gov.in/eregister/" target="_blank" rel="noopener">Trademarks</a>
+      </div>
+      ${listBox(cin)}
+      <div class="box"><h3>Team note</h3>
+        <textarea id="tNote" placeholder="What the team knows: who's reaching out, what you learned, next step" ${!db || !canWrite ? "disabled" : ""}>${esc(note.note || "")}</textarea>
+        <div class="inline" style="align-items:center"><button class="red" id="tSave" ${!db || !canWrite ? "disabled" : ""}>Save note</button><span class="meta" id="tMeta"></span></div>
+      </div>
+    </div>`;
+  $("sheet").hidden = false; $("scrim").hidden = false; $("sheet").scrollTop = 0;
+  $("closeSheet").onclick = closeSheet; $("tSave").onclick = saveNote;
+  wireListBox(cin);
+  if (note.at) whoName(note.by).then((n) => { if ($("tMeta")) $("tMeta").textContent = `Updated ${new Date(note.at).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}${n ? " by " + n : ""}`; });
+  $("closeSheet").focus();
+}
+function brandFacts(r) {
+  const basis = r.how === "website" ? "Read from the brand's website" : r.how === "name" ? "From what the brand is known for (its website couldn't be read). Check it." : "Not sorted yet: filed under E-commerce until someone checks it";
+  return `<dl class="facts">
+    <dt>Stage</dt><dd>${stageLabel(r)} D2C brand${r.igf ? `, by Instagram reach` : ""}${r.gone ? ` <span class="small">(page since removed from D2CStory)</span>` : ""}</dd>
+    <dt>Website</dt><dd>${r.w ? `<a href="https://${esc(r.w)}" target="_blank" rel="noopener">${esc(r.w)}</a>` : `<span class="small">None listed</span>`}</dd>
+    <dt>Instagram</dt><dd>${r.ig ? `<a href="https://www.instagram.com/${encodeURIComponent(r.ig)}/" target="_blank" rel="noopener">@${esc(r.ig)}</a>` : `<span class="small">None listed</span>`}</dd>
+    ${r.igf ? `<dt>Followers</dt><dd class="mono">${fmt(r.igf)}</dd>` : ""}
+    <dt>Filed by</dt><dd class="small">${esc(basis)}</dd>
+    <dt>Source</dt><dd class="small">D2CStory brand list (team copy)</dd>
+  </dl>`;
+}
+function refreshSheet() { if (openCin && $("listBox")) { const box = $("listBox"); box.outerHTML = listBox(openCin); wireListBox(openCin); } }
+function closeSheet() {
+  $("sheet").hidden = true; $("scrim").hidden = true;
+  const el = openCin && document.querySelector(`.row[data-cin="${CSS.escape(openCin)}"]`); openCin = null; el?.focus();
+}
+$("scrim").onclick = closeSheet;
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("sheet").hidden) closeSheet(); });
+
+/* ================= Writes ================= */
+function failToast(err) {
+  if (err?.code === "42501") { canWrite = false; toast("Your email isn't on the team list: not saved"); }
+  else toast("Couldn't save. Try again.");
+}
+async function createList(name) {
+  if (!db) return null;
+  const { data, error } = await sb.from("lists").insert({ name }).select().single();
+  if (error) { failToast(error); return null; }
+  lists.set(data.id, { name: data.name, by: data.created_by, at: data.created_at });
+  toast(`List “${name}” created`); rerender(); return data.id;
+}
+async function toggleItem(lid, cin, on) {
+  const { data, error } = on ? await sb.from("list_items").upsert({ list_id: lid, cid: cin }).select().single()
+    : await sb.from("list_items").delete().eq("list_id", lid).eq("cid", cin);
+  if (error) throw error;
+  if (on) items.set(lid + "__" + cin, { list: lid, cin, by: data.added_by, at: data.added_at }); else items.delete(lid + "__" + cin);
+  rerender();
+}
+let saving = false;
+async function saveNote() {
+  if (!db || saving || !openCin) return;
+  const cin = openCin, note = $("tNote").value.trim();
+  saving = true; $("tSave").disabled = true;
+  const { data, error } = note ? await sb.from("notes").upsert({ cid: cin, note, updated_by: me, updated_at: new Date().toISOString() }).select().single()
+    : await sb.from("notes").delete().eq("cid", cin);
+  saving = false; if ($("tSave")) $("tSave").disabled = !canWrite;
+  if (error) return failToast(error);
+  if (note) notes.set(cin, { note, by: data.updated_by, at: data.updated_at }); else notes.delete(cin);
+  toast(note ? "Note saved" : "Note cleared");
+}
+function toast(msg) { const t = $("toast"); t.textContent = msg; t.hidden = false; clearTimeout(toast._t); toast._t = setTimeout(() => (t.hidden = true), 2600); }
+
+/* ================= Data & team store ================= */
+function rerender() {
+  if (!view) { if (!document.activeElement || document.activeElement.id !== "newListName") renderHome(); }
+  else if (view === "list" && (!$("list") || !lists.has(listId))) renderCase();
+  else {
+    const h = document.querySelector(".titlecard h1");
+    if (view === "list" && h && lists.get(listId)) h.textContent = lists.get(listId).name;
+    if (document.getElementById("renForm") && lists.get(listId)?.name === $("renName")?.value.trim()) renderCase($("q")?.value || "");
+    renderRows();
+  }
+  refreshSheet();
+}
+async function allRows(table) {
+  const out = [];
+  for (let from = 0; ; from += 1000) {
+    const { data, error } = await sb.from(table).select("*").range(from, from + 999);
+    if (error) throw error;
+    out.push(...data); if (data.length < 1000) return out;
+  }
+}
+async function loadTeam() {
+  const [l, it, n] = await Promise.all([allRows("lists"), allRows("list_items"), allRows("notes")]);
+  lists = new Map(l.map((x) => [x.id, { name: x.name, by: x.created_by, at: x.created_at }]));
+  items = new Map(it.map((x) => [x.list_id + "__" + x.cid, { list: x.list_id, cin: x.cid, by: x.added_by, at: x.added_at }]));
+  notes = new Map(n.map((x) => [x.cid, { note: x.note, by: x.updated_by, at: x.updated_at }]));
+}
+let teamT;
+function teamChanged() {
+  clearTimeout(teamT);
+  teamT = setTimeout(async () => { try { await loadTeam(); rerender(); refreshSheet(); } catch {} }, 300);
+}
+async function connect() {
+  const sync = $("sync");
+  try { await loadTeam(); } catch { sync.textContent = "Lists offline"; return; }
+  db = true; if (ALL.length) rerender();
+  sb.channel("team")
+    .on("postgres_changes", { event: "*", schema: "public", table: "lists" }, teamChanged)
+    .on("postgres_changes", { event: "*", schema: "public", table: "list_items" }, teamChanged)
+    .on("postgres_changes", { event: "*", schema: "public", table: "notes" }, teamChanged)
+    .subscribe((st) => {
+      if (st === "SUBSCRIBED") { sync.textContent = "Team lists live"; sync.classList.add("live"); }
+      else if (st === "CHANNEL_ERROR" || st === "CLOSED" || st === "TIMED_OUT") { sync.textContent = "Lists not live: reload"; sync.classList.remove("live"); }
+    });
+}
+
+async function loadData() {
+  const [d, m] = await Promise.all([sb.storage.from("register").download("data.json"), sb.storage.from("register").download("meta.json")]);
+  if (d.error) throw d.error;
+  try { const meta = JSON.parse(await m.data.text()); $("sync").title = `Register updated ${new Date(meta.updated).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}`; } catch {}
+  return JSON.parse(await d.data.text());
+}
+function startData() {
+  $("app").innerHTML = `<p class="count">Opening the files…</p>`;
+  loadData().then((data) => {
+    ALL = data; byCin = new Map(); counts = {};
+    for (const r of ALL) {
+      r._q = [r.n, r.f, r.din, r.b ? "" : r.c, r.d, r.w, r.ig].filter(Boolean).join(" ").toLowerCase();
+      byCin.set(r.c, r); counts[r.cat] = (counts[r.cat] || 0) + 1; if (r.p) counts.picks = (counts.picks || 0) + 1; if (r.b) counts.brands = (counts.brands || 0) + 1;
+    }
+    counts.all = ALL.length;
+    let k = 0;
+    for (const grp of ["Consumer", "Tech"]) {
+      for (const id of CATS.filter((c) => c[2] === grp).map((c) => c[0]).sort((a, b) => (counts[b] || 0) - (counts[a] || 0))) COMP_OF[id] = ORDER[k++ % ORDER.length];
+    }
+    COMP_OF.picks = 0; COMP_OF.all = 2;
+    $("gq").placeholder = `Search all ${fmt(ALL.length)} companies, brands, founders, DINs`;
+    route();
+  }).catch(() => { $("app").innerHTML = `<p class="count">Couldn't open the register. On a new setup, run the one-time upload (pipeline/seed.py) first. Otherwise reload the page.</p>`; });
+}
+
+/* ================= Sign-in ================= */
+let signUp = false, started = false;
+function gate(msg = "", err = false) {
+  started = false; document.body.classList.add("out"); $("gq").disabled = true;
+  $("sync").textContent = ""; $("sync").classList.remove("live");
+  $("app").innerHTML = `<section class="titlecard gate"><div class="copy">
+    <span class="eyebrow">Restricted · team only</span>
+    <h1>The Register</h1>
+    <p>New companies from India's monthly MCA filings, filed by category, with founders and your team's lists. Sign in with your work email.</p>
+    <form id="authForm" novalidate>
+      <input type="email" id="authEmail" placeholder="Work email" autocomplete="email" aria-label="Email" required>
+      <input type="password" id="authPass" placeholder="Password, 8+ characters" autocomplete="${signUp ? "new-password" : "current-password"}" aria-label="Password" required minlength="8">
+      <button class="red" id="authGo">${signUp ? "Create account" : "Sign in"}</button>
+      <button type="button" class="linkish" id="authFlip">${signUp ? "Already have an account? Sign in" : "First time here? Create your account"}</button>
+      <span class="msg${err ? " err" : ""}" id="authMsg" role="status">${esc(msg)}</span>
+    </form>
+  </div><div class="art">${card("all", 0)}</div></section>`;
+  $("authFlip").onclick = () => { signUp = !signUp; gate(); };
+  $("authForm").onsubmit = async (e) => {
+    e.preventDefault();
+    const email = $("authEmail").value.trim().toLowerCase(), password = $("authPass").value, m = $("authMsg");
+    m.classList.remove("err");
+    if (!email || password.length < 8) { m.textContent = "Enter your email and a password of at least 8 characters."; m.classList.add("err"); return; }
+    $("authGo").disabled = true; m.textContent = signUp ? "Creating your account…" : "Signing in…";
+    const { data, error } = signUp ? await sb.auth.signUp({ email, password }) : await sb.auth.signInWithPassword({ email, password });
+    if ($("authGo")) $("authGo").disabled = false;
+    if (error) { m.textContent = error.message; m.classList.add("err"); return; }
+    if (signUp && !data.session) m.textContent = "Account created. Confirm the link in your inbox, then sign in.";
+  };
+}
+async function enter(session) {
+  if (started) return; started = true;
+  me = (session.user.email || "").toLowerCase();
+  const { data: team, error } = await sb.from("team").select("email").limit(1);
+  if (error || !team?.length) {
+    await sb.auth.signOut();
+    return gate(`${me} isn't on the team list yet. Ask the owner to add it, then sign in again.`, true);
+  }
+  document.body.classList.remove("out"); $("gq").disabled = false; $("outBtn").title = `Signed in as ${me}`;
+  startData(); connect();
+}
+$("outBtn").onclick = async () => { await sb.removeAllChannels(); await sb.auth.signOut(); };
+$("upBtn").onclick = () => $("upFile").click();
+$("upFile").onchange = async () => {
+  const files = [...$("upFile").files]; $("upFile").value = "";
+  for (const f of files) {
+    if (!/\.xlsx$/i.test(f.name)) { toast(`${f.name} isn't an .xlsx file`); continue; }
+    toast(`Uploading ${f.name}…`);
+    const { error } = await sb.storage.from("register").upload(`inbox/${Date.now()}-${f.name.replace(/[^\w.-]+/g, "_")}`, f);
+    toast(error ? `Couldn't upload ${f.name}: ${error.message}` : `${f.name} received. Its new companies appear after tonight's update.`);
+  }
+};
+(async function boot() {
+  if (!CFG.supabaseUrl || !CFG.supabaseAnonKey || !window.supabase) {
+    $("app").innerHTML = `<p class="count">This site isn't connected to its database yet. Add the Supabase URL and anon key to docs/config.js.</p>`; return;
+  }
+  sb = window.supabase.createClient(CFG.supabaseUrl, CFG.supabaseAnonKey);
+  sb.auth.onAuthStateChange((evt, s) => {
+    if (evt === "SIGNED_OUT") { db = null; ALL = []; lists = new Map(); items = new Map(); notes = new Map(); if (!$("sheet").hidden) closeSheet(); gate(); }
+    else if (s && (evt === "SIGNED_IN" || evt === "INITIAL_SESSION")) setTimeout(() => enter(s), 0);
+    else if (!s && evt === "INITIAL_SESSION") gate();
+  });
+})();
+</script>
+</body>
+</html>

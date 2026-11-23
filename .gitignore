@@ -1,0 +1,19 @@
+# Code only. The register, founder caches, the D2CStory brand list and MCA workbooks are private:
+# they live in the Supabase "register" bucket, never in this (public) repository.
+report/
+site/
+microsite/
+startup_tracker/samples/
+*.xlsx
+*.csv
+*.json
+!docs/*.json
+.claude/settings.local.json
+.venv/
+**/.venv/
+.env
+*.env
+tracker.db
+output/
+.DS_Store
+__pycache__/

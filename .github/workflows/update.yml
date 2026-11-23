@@ -1,0 +1,29 @@
+name: Update the register
+
+on:
+  schedule:
+    - cron: "30 20 * * *"   # every night, 02:00 IST
+  workflow_dispatch:          # "Run workflow" button in the Actions tab
+
+concurrency:
+  group: register
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r pipeline/requirements.txt
+      - run: python pipeline/update.py
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          TIME_BUDGET_MIN: "45"
+          # optional paid CIN API, used when the free sources find nothing (see README)
+          DIRECTORS_API_URL: ${{ secrets.DIRECTORS_API_URL }}
+          DIRECTORS_API_HEADERS: ${{ secrets.DIRECTORS_API_HEADERS }}
