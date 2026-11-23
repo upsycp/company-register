@@ -86,7 +86,7 @@ for name in st.list("inbox/"):
     print(f"{name}: {len(rows)} rows, {n_file} new companies filed", flush=True)
 # ---------------------------------------------------------------- 2b. trademark filings (new journal each Monday)
 try:
-    tagged, tm_new = trademarks.run(data, tmstate, log=lambda m: print(m, flush=True))
+    tagged, tm_new = trademarks.run(data, tmstate, st, log=lambda m: print(m, flush=True))
 except Exception as e:  # noqa: BLE001  - a journal problem shouldn't stop the rest of the update
     tagged, tm_new = 0, 0
     print("trademark journal step failed:", type(e).__name__, e, flush=True)

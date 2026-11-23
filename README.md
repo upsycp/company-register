@@ -85,6 +85,9 @@ company already in the register is tagged on it; the rest appear in the **Tradem
 brands. Journals show a trademark months to years after it was filed, so matches with the newest companies grow
 over time.
 
+To read past journals once (default: the last 3 months, about 13 issues), run Actions → "Backfill trademark
+journals (one-off)" → Run workflow. It saves results to storage and the next nightly update merges them in.
+
 ## How companies are filed
 `pipeline/categorize.py` scores each private company (Pvt Ltd or OPC) against every category using its
 registered business activity (the NIC code inside the CIN) and words in its name, and files it in the best

@@ -1,0 +1,28 @@
+name: Backfill trademark journals (one-off)
+
+on:
+  workflow_dispatch:
+    inputs:
+      months:
+        description: "How many months of past journals to read"
+        default: "3"
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        shard: [0, 1]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r pipeline/requirements.txt
+      - run: python pipeline/backfill_trademarks.py --months ${{ inputs.months }} --shard ${{ matrix.shard }} --shards 2
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}

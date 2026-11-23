@@ -6,7 +6,7 @@ look like an early brand: filed by a private company or LLP, filed in the last 1
 "Proposed to be Used" (not launched yet). A filing by a company already in the register is tagged on that
 company; the rest become "Trademark filings" records of their own.
 """
-import io, re
+import io, json, re, time
 from datetime import datetime, timedelta
 
 import requests
@@ -73,37 +73,66 @@ def parse_pdf(data):
     return recs
 
 
-def keep(rec, journal_date):
+def keep(rec, today=None):
+    """A recent filing by a private company or LLP, for a consumer brand that isn't on sale yet."""
     if rec["cls"] not in CLASS_CAT or "Proposed" not in rec["since"]:
         return False
     if not re.search(r"\b(private|pvt|llp|opc)\b", rec["who"], re.I) or re.search(r"\b(co\.,? ltd|fz|inc|gmbh)\b", rec["who"], re.I):
         return False
     try:
-        return journal_date - datetime.strptime(rec["filed"], "%d-%m-%Y") < timedelta(days=MAX_AGE_DAYS)
+        return (today or datetime.now()) - datetime.strptime(rec["filed"], "%d-%m-%Y") < timedelta(days=MAX_AGE_DAYS)
     except ValueError:
         return False
 
 
-def merge(data, journal_no, journal_date, recs):
+def journal_date(pdf_bytes):
+    m = re.search(r"Date:\s*\n?\s*(\d\d/\d\d/\d{4})", PdfReader(io.BytesIO(pdf_bytes)).pages[0].extract_text() or "")
+    return datetime.strptime(m.group(1), "%d/%m/%Y").strftime("%Y-%m-%d") if m else datetime.now().strftime("%Y-%m-%d")
+
+
+def process_journal(jn, files, log=print):
+    """Download and read one journal's consumer-class PDFs. Returns kept filings (plain dicts)."""
+    kept, jd = [], None
+    for fn, lo, hi in wanted(files):
+        r = None
+        for attempt in range(3):
+            try:
+                r = requests.post(PDF_URL, data={"FileName": fn}, headers=UA, timeout=900)
+                if r.status_code == 200 and r.content.startswith(b"%PDF"):
+                    break
+            except requests.RequestException:
+                pass
+            time.sleep(20 * (attempt + 1))
+        if r is None or not r.content.startswith(b"%PDF"):
+            log(f"journal {jn} class {lo}-{hi}: download failed"); continue
+        jd = jd or journal_date(r.content)
+        recs = parse_pdf(r.content)
+        k = [dict(x, jn=jn, jd=jd) for x in recs if keep(x)]
+        kept += k
+        log(f"journal {jn} class {lo}-{hi}: {len(recs)} applications, {len(k)} kept")
+    return kept
+
+
+def merge(data, filings):
     """Add kept filings to the register in place. Returns (tagged_existing, new_records)."""
     by_name = {norm(r["n"]): r for r in data if not r.get("b")}
     tagged = added = 0
-    jd = journal_date.strftime("%Y-%m-%d")
-    for x in recs:
-        if not keep(x, journal_date):
+    for x in filings:
+        if not keep(x):                      # re-check age at merge time
             continue
         filed = datetime.strptime(x["filed"], "%d-%m-%Y").strftime("%Y-%m-%d")
-        tm = {"mk": x["mark"], "cls": x["cls"], "g": x["goods"], "fd": filed, "no": x["no"], "jn": journal_no, "jd": jd}
+        tm = {"mk": x["mark"], "cls": x["cls"], "g": x["goods"], "fd": filed, "no": x["no"], "jn": x["jn"], "jd": x["jd"]}
         k = norm(x["who"])
         r = by_name.get(k)
         if r is None:
             r = {"c": "t-" + re.sub(r"[^a-z0-9]+", "-", k).strip("-")[:56], "n": x["who"].strip(), "cat": CLASS_CAT[x["cls"]],
                  "t": 1, "loc": x["where"].title()}
             data.append(r); by_name[k] = r; added += 1
-        elif not r.get("t"):
+        if any(old.get("no") == x["no"] for old in r.setdefault("tm", [])):
+            continue
+        if not r.get("t") and not r["tm"]:
             tagged += 1
-        if not any(old.get("no") == x["no"] for old in r.setdefault("tm", [])):
-            r["tm"].append(tm)
+        r["tm"].append(tm)
         if r.get("t"):   # file a brand-only record under its most common class
             cs = [f["cls"] for f in r["tm"]]
             r["cat"] = CLASS_CAT[max(set(cs), key=cs.count)]
@@ -111,28 +140,22 @@ def merge(data, journal_no, journal_date, recs):
     return tagged, added
 
 
-def run(data, state, log=print):
-    """state: {"done": [journal numbers]}. Processes any unprocessed journal among the 4 newest."""
+def run(data, state, store, log=print):
+    """Nightly: read any new journal (one appears each Monday) and merge results saved by the backfill job."""
     done = set(state.setdefault("done", []))
-    total = (0, 0)
     journals = latest_journals()
-    if not done:                       # first run: start from this week's journal, don't backfill
-        done = {jn for jn, _ in journals[1:4]}
+    if not done:                       # first run: this week's journal; older ones come from the backfill job
+        done = {jn for jn, _ in journals[1:]}
+    filings = []
     for jn, files in journals[:4]:
-        if jn in done:
-            continue
-        jdate = None
-        for fn, lo, hi in wanted(files):
-            r = requests.post(PDF_URL, data={"FileName": fn}, headers=UA, timeout=600)
-            if r.status_code != 200 or not r.content.startswith(b"%PDF"):
-                log(f"journal {jn} class {lo}-{hi}: download failed ({r.status_code})"); continue
-            recs = parse_pdf(r.content)
-            if jdate is None:
-                m = re.search(r"Date:\s*\n?\s*(\d\d/\d\d/\d{4})", PdfReader(io.BytesIO(r.content)).pages[0].extract_text() or "")
-                jdate = datetime.strptime(m.group(1), "%d/%m/%Y") if m else datetime.now()
-            t, a = merge(data, jn, jdate, recs)
-            total = (total[0] + t, total[1] + a)
-            log(f"journal {jn} class {lo}-{hi}: {len(recs)} applications, {t} tagged on register companies, {a} new brand filings")
-        done.add(jn)
-    state["done"] = sorted(done)[-30:]
-    return total
+        if jn not in done:
+            filings += process_journal(jn, files, log)
+            done.add(jn)
+    for name in store.list("tm-backfill/"):     # results saved by .github/workflows/backfill-trademarks.yml
+        part = json.loads(store.get(f"tm-backfill/{name}") or b"{}")
+        filings += part.get("filings", [])
+        done.add(part.get("jn"))
+        store.move(f"tm-backfill/{name}", f"tm-merged/{name}")
+        log(f"merged backfill results for journal {part.get('jn')}: {len(part.get('filings', []))} filings")
+    state["done"] = sorted(x for x in done if x)
+    return merge(data, filings)
